@@ -1,21 +1,32 @@
 package com.kitchentech.authserver.config;
 
+import com.kitchentech.authserver.dto.UserDetailsDto;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -31,7 +42,7 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults());  // Включаем форму логина
         return http.build();
     }
 
@@ -43,11 +54,11 @@ public class SecurityConfig {
                 .clientSecret("{noop}secret")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
                 .scope(OidcScopes.OPENID)
                 .scope("read")
-                .scope("write") // можно добавить любые свои скоупы
+                .scope("write")
                 .build();
 
         return new InMemoryRegisteredClientRepository(registeredClient);
@@ -83,5 +94,40 @@ public class SecurityConfig {
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+//        return username -> {
+//
+//            RestTemplate restTemplate = new RestTemplate();
+//            ResponseEntity<UserDetailsDto> response = restTemplate.getForEntity(
+//                    "http://localhost:8091/api/users/" + username, UserDetailsDto.class
+//            );
+//
+//            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+//                throw new UsernameNotFoundException("User not found");
+//            }
+//
+//            UserDetailsDto user = response.getBody();
+//            return User.withUsername(user.getUsername())
+//                    .password(user.getPassword())
+//                    .roles(user.getRoles().toArray(new String[0]))
+//                    .build();
+//        };
+
+        return new InMemoryUserDetailsManager(
+                User.withUsername("user")
+                        .password(passwordEncoder().encode("password"))
+                        .roles("USER")
+                        .build()
+        );
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

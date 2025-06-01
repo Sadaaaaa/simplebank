@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовая страница</title>
+</head>
+<body>
+<h1>Добро пожаловать на тестовую страницу!</h1>
+<p>Эта страница не требует никаких данных из модели.</p>
+<p>Дата и время сервера: <span th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm:ss')}"></span></p>
+</body>
+</html>

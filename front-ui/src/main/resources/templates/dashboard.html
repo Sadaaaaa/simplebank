@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+<h1>Личный кабинет</h1>
+
+<!-- Блок настроек аккаунта -->
+<section>
+    <h2>Настройки аккаунта</h2>
+    <form th:action="@{/account/delete}" method="post">
+        <p>Логин: <span th:text="${user.username}"></span></p>
+        <button type="submit">Удалить аккаунт</button>
+        <p th:if="${deleteError}" th:text="${deleteError}"></p>
+    </form>
+
+    <form th:action="@{/account/change-password}" method="post">
+        <label>Новый пароль: <input type="password" name="newPassword" required/></label>
+        <button type="submit">Изменить пароль</button>
+        <p th:if="${passwordError}" th:text="${passwordError}"></p>
+    </form>
+
+    <form th:action="@{/account/update}" method="post">
+        <label>Фамилия: <input type="text" name="lastName" th:value="${user.lastName}" required/></label><br/>
+        <label>Имя: <input type="text" name="firstName" th:value="${user.firstName}" required/></label><br/>
+        <label>Email: <input type="email" name="email" th:value="${user.email}" required/></label><br/>
+        <label>Дата рождения: <input type="date" name="birthDate" th:value="${user.birthDate}" required/></label><br/>
+        <button type="submit">Сохранить изменения</button>
+        <p th:if="${validationError}" th:text="${validationError}"></p>
+    </form>
+
+    <h3>Счета</h3>
+    <table>
+        <tr><th>Валюта</th><th>Сумма</th><th>Действия</th></tr>
+        <tr th:each="account : ${accounts}">
+            <td th:text="${account.currency}"></td>
+            <td th:text="${account.balance}"></td>
+            <td>
+                <form th:action="@{/account/delete-account}" method="post">
+                    <input type="hidden" name="currency" th:value="${account.currency}"/>
+                    <button type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+    <form th:action="@{/account/add-account}" method="post">
+        <label>Валюта: <input type="text" name="currency" required/></label>
+        <label>Начальный баланс: <input type="number" name="initialBalance" step="0.01" required/></label>
+        <button type="submit">Добавить счёт</button>
+    </form>
+
+    <a th:href="@{/logout}">Выйти</a>
+</section>
+
+<!-- Блок внесения и снятия денег -->
+<section>
+    <h2>Внесение и снятие денег</h2>
+    <form th:action="@{/account/deposit-withdraw}" method="post">
+        <label>Счёт:
+            <select name="accountId" required>
+                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
+            </select>
+        </label>
+        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
+        <button type="submit" name="action" value="deposit">Положить</button>
+        <button type="submit" name="action" value="withdraw">Снять</button>
+        <p th:if="${transactionError}" th:text="${transactionError}"></p>
+    </form>
+</section>
+
+<!-- Блок перевода между своими счетами -->
+<section>
+    <h2>Перевод между своими счетами</h2>
+    <form th:action="@{/account/transfer-internal}" method="post">
+        <label>Откуда:
+            <select name="fromAccountId" required>
+                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
+            </select>
+        </label>
+        <label>Куда:
+            <select name="toAccountId" required>
+                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">EUR</option>
+            </select>
+        </label>
+        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
+        <button type="submit">Перевести</button>
+        <p th:if="${internalTransferError}" th:text="${internalTransferError}"></p>
+    </form>
+</section>
+
+<!-- Блок перевода другому аккаунту -->
+<section>
+    <h2>Перевод другому аккаунту</h2>
+    <form th:action="@{/account/transfer-external}" method="post">
+        <label>Счёт отправителя:
+            <select name="fromAccountId" required>
+                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
+            </select>
+        </label>
+        <label>Счёт получателя:
+            <input type="text" name="recipientAccount" placeholder="Введите логин или ID аккаунта" required/>
+        </label>
+        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
+        <button type="submit">Перевести</button>
+        <p th:if="${externalTransferError}" th:text="${externalTransferError}"></p>
+    </form>
+</section>
+
+<!-- Блок курсов валют -->
+<section>
+    <h2>Курсы валют</h2>
+    <table>
+        <tr><th>Валюта</th><th>Покупка</th><th>Продажа</th></tr>
+        <tr th:each="rate : ${exchangeRates}">
+            <td th:text="${rate.currency}"></td>
+            <td th:text="${rate.buy}"></td>
+            <td th:text="${rate.sell}"></td>
+        </tr>
+    </table>
+</section>
+
+</body>
+</html>

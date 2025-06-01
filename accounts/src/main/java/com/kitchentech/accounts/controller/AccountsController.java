@@ -12,4 +12,6 @@ public class AccountsController {
     public String getAccounts() {
         return "Account list";
     }
+
+
 }
