@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"   # Web UI
+      - "8600:8600/udp"  # DNS
+    command: agent -server -bootstrap -ui -client=0.0.0.0
+
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:latest
+#    container_name: keycloak
+#    command: start-dev
+#    environment:
+#      KEYCLOAK_ADMIN: admin
+#      KEYCLOAK_ADMIN_PASSWORD: admin
+#    ports:
+#      - "8082:8080"
