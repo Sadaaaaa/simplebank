@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -18,11 +20,16 @@ import java.util.List;
 public class UserController {
 
     @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserDetailsDto> getUser(@PathVariable String username) {
+    public ResponseEntity<?> getUser(@PathVariable String username) {
         log.warn("username " + username);
 
         if (!"user".equals(username)) {
-            return ResponseEntity.notFound().build();
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "User not found");
+            errorResponse.put("message", "User with username '" + username + "' does not exist");
+            return ResponseEntity.status(404)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(errorResponse);
         }
 
         UserDetailsDto user = new UserDetailsDto();
