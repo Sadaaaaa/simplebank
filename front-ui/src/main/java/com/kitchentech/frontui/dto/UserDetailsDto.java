@@ -1,4 +1,4 @@
-package com.kitchentech.accounts.dto;
+package com.kitchentech.frontui.dto;
 
 import lombok.Data;
 

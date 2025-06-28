@@ -2,6 +2,7 @@ package com.kitchentech.accounts.controller;
 
 import com.kitchentech.accounts.dto.UserDetailsDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +14,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
-    @GetMapping("/{username}")
+    @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDetailsDto> getUser(@PathVariable String username) {
-
         log.warn("username " + username);
 
         if (!"user".equals(username)) {
@@ -29,7 +29,10 @@ public class UserController {
         user.setUsername("user");
         user.setPassword(new BCryptPasswordEncoder().encode("password"));
         user.setRoles(List.of("USER"));
+        user.setEnabled(true);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(user);
     }
 }
