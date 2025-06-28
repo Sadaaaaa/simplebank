@@ -18,6 +18,7 @@ public class SecurityConfig {
         http
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/", "/index", "/login**").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/**").permitAll()
                         .anyExchange().authenticated()
                 )
@@ -26,20 +27,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Bean
-//    public ClientRegistrationRepository clientRegistrationRepository() {
-//        ClientRegistration registration = ClientRegistration.withRegistrationId("gateway-client")
-//                .clientId("gateway-client")
-//                .clientSecret("secret")
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
-//                .authorizationUri("http://localhost:9000/oauth2/authorize")
-//                .tokenUri("http://localhost:9000/oauth2/token")
-//                .userInfoUri("http://localhost:9000/userinfo")
-//                .scope("openid", "read", "write")
-//                .build();
-//
-//        return new InMemoryClientRegistrationRepository(registration);
-//    }
 }
