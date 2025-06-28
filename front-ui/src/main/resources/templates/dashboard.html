@@ -2,124 +2,765 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleBank - Панель управления</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .dashboard-container {
+            padding: 2rem 0;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+        }
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .account-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        .currency-rate {
+            font-weight: 600;
+            color: #28a745;
+        }
+        .logout-link {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .logout-link:hover {
+            color: #c82333;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h1>Личный кабинет</h1>
+    <div class="container-fluid dashboard-container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="mb-0">
+                        <i class="bi bi-bank2 text-primary"></i>
+                        SimpleBank - Панель управления
+                    </h1>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Добро пожаловать, <strong th:text="${username}">Пользователь</strong>!</span>
+                        <a href="/logout" class="logout-link">
+                            <i class="bi bi-box-arrow-right"></i> Выйти
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Блок настроек аккаунта -->
-<section>
-    <h2>Настройки аккаунта</h2>
-    <form th:action="@{/account/delete}" method="post">
-        <p>Логин: <span th:text="${user.username}"></span></p>
-        <button type="submit">Удалить аккаунт</button>
-        <p th:if="${deleteError}" th:text="${deleteError}"></p>
-    </form>
+        <div class="row">
+            <!-- Блок настроек аккаунта -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-gear-fill me-2"></i>
+                            Настройки аккаунта
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Основная информация -->
+                        <form id="accountForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Логин</label>
+                                    <input type="text" class="form-control" id="username" th:value="${username}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Действия</label>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteAccount()">
+                                            <i class="bi bi-trash"></i> Удалить аккаунт
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-    <form th:action="@{/account/change-password}" method="post">
-        <label>Новый пароль: <input type="password" name="newPassword" required/></label>
-        <button type="submit">Изменить пароль</button>
-        <p th:if="${passwordError}" th:text="${passwordError}"></p>
-    </form>
+                            <!-- Смена пароля -->
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Новый пароль</label>
+                                    <input type="password" class="form-control" id="newPassword" placeholder="Введите новый пароль">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-primary" onclick="changePassword()">
+                                            <i class="bi bi-key"></i> Изменить пароль
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-    <form th:action="@{/account/update}" method="post">
-        <label>Фамилия: <input type="text" name="lastName" th:value="${user.lastName}" required/></label><br/>
-        <label>Имя: <input type="text" name="firstName" th:value="${user.firstName}" required/></label><br/>
-        <label>Email: <input type="email" name="email" th:value="${user.email}" required/></label><br/>
-        <label>Дата рождения: <input type="date" name="birthDate" th:value="${user.birthDate}" required/></label><br/>
-        <button type="submit">Сохранить изменения</button>
-        <p th:if="${validationError}" th:text="${validationError}"></p>
-    </form>
+                            <!-- Личная информация -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Фамилия *</label>
+                                    <input type="text" class="form-control" id="lastName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Имя *</label>
+                                    <input type="text" class="form-control" id="firstName" required>
+                                </div>
+                            </div>
 
-    <h3>Счета</h3>
-    <table>
-        <tr><th>Валюта</th><th>Сумма</th><th>Действия</th></tr>
-        <tr th:each="account : ${accounts}">
-            <td th:text="${account.currency}"></td>
-            <td th:text="${account.balance}"></td>
-            <td>
-                <form th:action="@{/account/delete-account}" method="post">
-                    <input type="hidden" name="currency" th:value="${account.currency}"/>
-                    <button type="submit">Удалить</button>
-                </form>
-            </td>
-        </tr>
-    </table>
-    <form th:action="@{/account/add-account}" method="post">
-        <label>Валюта: <input type="text" name="currency" required/></label>
-        <label>Начальный баланс: <input type="number" name="initialBalance" step="0.01" required/></label>
-        <button type="submit">Добавить счёт</button>
-    </form>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Дата рождения *</label>
+                                    <input type="date" class="form-control" id="birthDate" required>
+                                </div>
+                            </div>
 
-    <a th:href="@{/logout}">Выйти</a>
-</section>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary" onclick="savePersonalInfo()">
+                                    <i class="bi bi-check-circle"></i> Сохранить информацию
+                                </button>
+                            </div>
+                        </form>
 
-<!-- Блок внесения и снятия денег -->
-<section>
-    <h2>Внесение и снятие денег</h2>
-    <form th:action="@{/account/deposit-withdraw}" method="post">
-        <label>Счёт:
-            <select name="accountId" required>
-                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
-            </select>
-        </label>
-        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
-        <button type="submit" name="action" value="deposit">Положить</button>
-        <button type="submit" name="action" value="withdraw">Снять</button>
-        <p th:if="${transactionError}" th:text="${transactionError}"></p>
-    </form>
-</section>
+                        <!-- Счета пользователя -->
+                        <hr class="my-4">
+                        <h6><i class="bi bi-credit-card me-2"></i>Мои счета</h6>
+                        <div id="accountsList">
+                            <!-- Счета будут загружены динамически -->
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="showAddAccountModal()">
+                            <i class="bi bi-plus-circle"></i> Добавить счет
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-<!-- Блок перевода между своими счетами -->
-<section>
-    <h2>Перевод между своими счетами</h2>
-    <form th:action="@{/account/transfer-internal}" method="post">
-        <label>Откуда:
-            <select name="fromAccountId" required>
-                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
-            </select>
-        </label>
-        <label>Куда:
-            <select name="toAccountId" required>
-                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">EUR</option>
-            </select>
-        </label>
-        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
-        <button type="submit">Перевести</button>
-        <p th:if="${internalTransferError}" th:text="${internalTransferError}"></p>
-    </form>
-</section>
+            <!-- Блок внесения и снятия денег -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-cash-stack me-2"></i>
+                            Внесение и снятие денег
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="moneyOperationForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Выберите счет *</label>
+                                    <select class="form-select" id="operationAccount" required>
+                                        <option value="">Выберите счет</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Сумма *</label>
+                                    <input type="number" class="form-control" id="operationAmount" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-success" onclick="depositMoney()">
+                                            <i class="bi bi-plus-circle"></i> Положить
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-warning" onclick="withdrawMoney()">
+                                            <i class="bi bi-dash-circle"></i> Снять
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-<!-- Блок перевода другому аккаунту -->
-<section>
-    <h2>Перевод другому аккаунту</h2>
-    <form th:action="@{/account/transfer-external}" method="post">
-        <label>Счёт отправителя:
-            <select name="fromAccountId" required>
-                <option th:each="acc : ${accounts}" th:value="${acc.id}" th:text="${acc.currency}">USD</option>
-            </select>
-        </label>
-        <label>Счёт получателя:
-            <input type="text" name="recipientAccount" placeholder="Введите логин или ID аккаунта" required/>
-        </label>
-        <label>Сумма: <input type="number" name="amount" step="0.01" required/></label>
-        <button type="submit">Перевести</button>
-        <p th:if="${externalTransferError}" th:text="${externalTransferError}"></p>
-    </form>
-</section>
+                <!-- Блок перевода между своими счетами -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            Перевод между счетами
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="internalTransferForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Счет отправителя *</label>
+                                    <select class="form-select" id="fromAccount" required>
+                                        <option value="">Выберите счет</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Счет получателя *</label>
+                                    <select class="form-select" id="toAccount" required>
+                                        <option value="">Выберите счет</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Сумма перевода *</label>
+                                    <input type="number" class="form-control" id="internalTransferAmount" step="0.01" min="0" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-primary" onclick="internalTransfer()">
+                                            <i class="bi bi-arrow-right"></i> Перевести
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Блок курсов валют -->
-<section>
-    <h2>Курсы валют</h2>
-    <table>
-        <tr><th>Валюта</th><th>Покупка</th><th>Продажа</th></tr>
-        <tr th:each="rate : ${exchangeRates}">
-            <td th:text="${rate.currency}"></td>
-            <td th:text="${rate.buy}"></td>
-            <td th:text="${rate.sell}"></td>
-        </tr>
-    </table>
-</section>
+        <div class="row">
+            <!-- Блок перевода на другой аккаунт -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Перевод на другой аккаунт
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="externalTransferForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Мой счет *</label>
+                                    <select class="form-select" id="myAccount" required>
+                                        <option value="">Выберите счет</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Получатель *</label>
+                                    <input type="text" class="form-control" id="recipientUsername" placeholder="Логин получателя" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Счет получателя *</label>
+                                    <select class="form-select" id="recipientAccount" required>
+                                        <option value="">Сначала выберите получателя</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Сумма *</label>
+                                    <input type="number" class="form-control" id="externalTransferAmount" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary" onclick="externalTransfer()">
+                                    <i class="bi bi-send"></i> Отправить перевод
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Блок курсов валют -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-currency-exchange me-2"></i>
+                            Курсы валют
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Валюта</th>
+                                        <th>Покупка</th>
+                                        <th>Продажа</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="currencyRatesTable">
+                                    <!-- Курсы валют будут загружены динамически -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <small class="text-muted">Курсы обновляются каждые 5 минут</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления счета -->
+    <div class="modal fade" id="addAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить новый счет</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccountForm">
+                        <div class="mb-3">
+                            <label class="form-label">Валюта *</label>
+                            <select class="form-select" id="accountCurrency" required>
+                                <option value="">Выберите валюту</option>
+                                <option value="RUB">Рубль (RUB)</option>
+                                <option value="USD">Доллар (USD)</option>
+                                <option value="EUR">Евро (EUR)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Название счета</label>
+                            <input type="text" class="form-control" id="accountName" placeholder="Например: Основной счет">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="addAccount()">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Глобальные переменные
+        let userAccounts = [];
+        let currencyRates = [];
+
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserAccounts();
+            loadCurrencyRates();
+            setupEventListeners();
+        });
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Поиск получателя
+            document.getElementById('recipientUsername').addEventListener('input', function() {
+                const username = this.value.trim();
+                if (username.length >= 3) {
+                    searchRecipient(username);
+                } else {
+                    document.getElementById('recipientAccount').innerHTML = '<option value="">Сначала выберите получателя</option>';
+                }
+            });
+
+            // Валидация даты рождения
+            document.getElementById('birthDate').addEventListener('change', function() {
+                validateBirthDate(this.value);
+            });
+        }
+
+        // Загрузка счетов пользователя
+        function loadUserAccounts() {
+            // Здесь будет API вызов для загрузки счетов
+            // Пока используем моковые данные
+            userAccounts = [
+                { id: 1, currency: 'RUB', balance: 50000, name: 'Основной счет' },
+                { id: 2, currency: 'USD', balance: 1000, name: 'Долларовый счет' }
+            ];
+            updateAccountsUI();
+        }
+
+        // Обновление UI счетов
+        function updateAccountsUI() {
+            const accountsList = document.getElementById('accountsList');
+            const selects = ['operationAccount', 'fromAccount', 'toAccount', 'myAccount'];
+            
+            // Обновляем список счетов
+            accountsList.innerHTML = userAccounts.map(account => `
+                <div class="account-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${account.name || account.currency}</h6>
+                            <span class="badge bg-primary">${account.currency}</span>
+                            <span class="ms-2">${account.balance.toLocaleString()} ${account.currency}</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm me-1" onclick="editAccount(${account.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAccount(${account.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Обновляем селекты
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">Выберите счет</option>' + 
+                        userAccounts.map(account => 
+                            `<option value="${account.id}">${account.name || account.currency} (${account.balance} ${account.currency})</option>`
+                        ).join('');
+                }
+            });
+        }
+
+        // Загрузка курсов валют
+        function loadCurrencyRates() {
+            // Здесь будет API вызов для загрузки курсов
+            // Пока используем моковые данные
+            currencyRates = [
+                { currency: 'USD', buy: 95.50, sell: 96.20 },
+                { currency: 'EUR', buy: 103.80, sell: 104.50 },
+                { currency: 'CNY', buy: 13.20, sell: 13.40 }
+            ];
+            updateCurrencyRatesUI();
+        }
+
+        // Обновление UI курсов валют
+        function updateCurrencyRatesUI() {
+            const table = document.getElementById('currencyRatesTable');
+            table.innerHTML = currencyRates.map(rate => `
+                <tr>
+                    <td><strong>${rate.currency}</strong></td>
+                    <td class="currency-rate">${rate.buy}</td>
+                    <td class="currency-rate">${rate.sell}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Функции для работы с аккаунтом
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            if (!newPassword.trim()) {
+                showAlert('Пароль не может быть пустым', 'danger');
+                return;
+            }
+            
+            // Здесь будет API вызов для смены пароля
+            showAlert('Пароль успешно изменен', 'success');
+            document.getElementById('newPassword').value = '';
+        }
+
+        function savePersonalInfo() {
+            const lastName = document.getElementById('lastName').value;
+            const firstName = document.getElementById('firstName').value;
+            const email = document.getElementById('email').value;
+            const birthDate = document.getElementById('birthDate').value;
+
+            if (!lastName || !firstName || !email || !birthDate) {
+                showAlert('Все поля должны быть заполнены', 'danger');
+                return;
+            }
+
+            if (!validateBirthDate(birthDate)) {
+                return;
+            }
+
+            // Здесь будет API вызов для сохранения информации
+            showAlert('Информация успешно сохранена', 'success');
+        }
+
+        function deleteAccount() {
+            const hasNonZeroBalance = userAccounts.some(account => account.balance > 0);
+            if (hasNonZeroBalance) {
+                showAlert('Невозможно удалить аккаунт с ненулевым балансом', 'danger');
+                return;
+            }
+
+            if (confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
+                // Здесь будет API вызов для удаления аккаунта
+                showAlert('Аккаунт успешно удален', 'success');
+            }
+        }
+
+        // Функции для работы с деньгами
+        function depositMoney() {
+            const accountId = document.getElementById('operationAccount').value;
+            const amount = parseFloat(document.getElementById('operationAmount').value);
+
+            if (!accountId || !amount || amount <= 0) {
+                showAlert('Выберите счет и введите корректную сумму', 'danger');
+                return;
+            }
+
+            // Здесь будет API вызов для пополнения
+            const account = userAccounts.find(acc => acc.id == accountId);
+            account.balance += amount;
+            updateAccountsUI();
+            showAlert(`Счет пополнен на ${amount} ${account.currency}`, 'success');
+            document.getElementById('operationAmount').value = '';
+        }
+
+        function withdrawMoney() {
+            const accountId = document.getElementById('operationAccount').value;
+            const amount = parseFloat(document.getElementById('operationAmount').value);
+
+            if (!accountId || !amount || amount <= 0) {
+                showAlert('Выберите счет и введите корректную сумму', 'danger');
+                return;
+            }
+
+            const account = userAccounts.find(acc => acc.id == accountId);
+            if (amount > account.balance) {
+                showAlert('Недостаточно средств на счете', 'danger');
+                return;
+            }
+
+            // Здесь будет API вызов для снятия
+            account.balance -= amount;
+            updateAccountsUI();
+            showAlert(`Снято ${amount} ${account.currency}`, 'success');
+            document.getElementById('operationAmount').value = '';
+        }
+
+        // Функции для переводов
+        function internalTransfer() {
+            const fromAccountId = document.getElementById('fromAccount').value;
+            const toAccountId = document.getElementById('toAccount').value;
+            const amount = parseFloat(document.getElementById('internalTransferAmount').value);
+
+            if (!fromAccountId || !toAccountId || !amount || amount <= 0) {
+                showAlert('Заполните все поля корректно', 'danger');
+                return;
+            }
+
+            if (fromAccountId === toAccountId) {
+                showAlert('Нельзя переводить на тот же счет', 'danger');
+                return;
+            }
+
+            const fromAccount = userAccounts.find(acc => acc.id == fromAccountId);
+            if (amount > fromAccount.balance) {
+                showAlert('Недостаточно средств на счете отправителя', 'danger');
+                return;
+            }
+
+            // Здесь будет API вызов для внутреннего перевода
+            fromAccount.balance -= amount;
+            const toAccount = userAccounts.find(acc => acc.id == toAccountId);
+            toAccount.balance += amount;
+            updateAccountsUI();
+            showAlert(`Перевод выполнен: ${amount} ${fromAccount.currency}`, 'success');
+            document.getElementById('internalTransferAmount').value = '';
+        }
+
+        function searchRecipient(username) {
+            // Здесь будет API вызов для поиска получателя
+            // Пока используем моковые данные
+            const recipientAccounts = [
+                { id: 101, currency: 'RUB', name: 'Основной счет' },
+                { id: 102, currency: 'USD', name: 'Долларовый счет' }
+            ];
+
+            const select = document.getElementById('recipientAccount');
+            select.innerHTML = '<option value="">Выберите счет получателя</option>' + 
+                recipientAccounts.map(account => 
+                    `<option value="${account.id}">${account.name} (${account.currency})</option>`
+                ).join('');
+        }
+
+        function externalTransfer() {
+            const myAccountId = document.getElementById('myAccount').value;
+            const recipientAccountId = document.getElementById('recipientAccount').value;
+            const amount = parseFloat(document.getElementById('externalTransferAmount').value);
+
+            if (!myAccountId || !recipientAccountId || !amount || amount <= 0) {
+                showAlert('Заполните все поля корректно', 'danger');
+                return;
+            }
+
+            const myAccount = userAccounts.find(acc => acc.id == myAccountId);
+            if (amount > myAccount.balance) {
+                showAlert('Недостаточно средств на вашем счете', 'danger');
+                return;
+            }
+
+            // Здесь будет API вызов для внешнего перевода
+            myAccount.balance -= amount;
+            updateAccountsUI();
+            showAlert(`Перевод отправлен: ${amount} ${myAccount.currency}`, 'success');
+            document.getElementById('externalTransferAmount').value = '';
+        }
+
+        // Функции для работы со счетами
+        function showAddAccountModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addAccountModal'));
+            modal.show();
+        }
+
+        function addAccount() {
+            const currency = document.getElementById('accountCurrency').value;
+            const name = document.getElementById('accountName').value;
+
+            if (!currency) {
+                showAlert('Выберите валюту', 'danger');
+                return;
+            }
+
+            // Проверяем, что у пользователя нет счета в этой валюте
+            const existingAccount = userAccounts.find(acc => acc.currency === currency);
+            if (existingAccount) {
+                showAlert(`У вас уже есть счет в валюте ${currency}`, 'danger');
+                return;
+            }
+
+            // Здесь будет API вызов для создания счета
+            const newAccount = {
+                id: Date.now(),
+                currency: currency,
+                balance: 0,
+                name: name || `${currency} счет`
+            };
+
+            userAccounts.push(newAccount);
+            updateAccountsUI();
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
+            modal.hide();
+            
+            document.getElementById('addAccountForm').reset();
+            showAlert(`Счет в валюте ${currency} создан`, 'success');
+        }
+
+        function editAccount(accountId) {
+            const account = userAccounts.find(acc => acc.id === accountId);
+            const newName = prompt('Введите новое название счета:', account.name);
+            
+            if (newName !== null && newName.trim()) {
+                account.name = newName.trim();
+                updateAccountsUI();
+                showAlert('Название счета обновлено', 'success');
+            }
+        }
+
+        function deleteAccount(accountId) {
+            const account = userAccounts.find(acc => acc.id === accountId);
+            
+            if (account.balance > 0) {
+                showAlert('Невозможно удалить счет с ненулевым балансом', 'danger');
+                return;
+            }
+
+            if (confirm(`Удалить счет ${account.name}?`)) {
+                userAccounts = userAccounts.filter(acc => acc.id !== accountId);
+                updateAccountsUI();
+                showAlert('Счет удален', 'success');
+            }
+        }
+
+        // Вспомогательные функции
+        function validateBirthDate(birthDate) {
+            if (!birthDate) return false;
+
+            const birth = new Date(birthDate);
+            const today = new Date();
+            const age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+
+            if (age < 18) {
+                showAlert('Возраст должен быть не менее 18 лет', 'danger');
+                return false;
+            }
+
+            return true;
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Автообновление курсов валют
+        setInterval(loadCurrencyRates, 300000); // каждые 5 минут
+    </script>
 </body>
 </html>

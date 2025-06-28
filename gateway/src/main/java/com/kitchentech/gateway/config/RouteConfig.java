@@ -15,6 +15,12 @@ public class RouteConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         log.info("✅ Custom RouteLocator bean created");
         return builder.routes()
+                .route("front_ui_route", r -> r
+                        .path("/", "/login", "/dashboard", "/index")
+                        .filters(f -> f
+                                .preserveHostHeader()
+                        )
+                        .uri("lb://front-ui"))
                 .route("accounts_route", r -> r
                         .path("/api/accounts/**")
                         .filters(f -> f
