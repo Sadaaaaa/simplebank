@@ -42,16 +42,23 @@ public class SecurityConfig {
     private String gatewayUrl;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, RestTemplate restTemplate) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/error", "/css/**", "/dashboard").permitAll()
+                        .requestMatchers("/login", "/error", "/css/**", "/dashboard", "/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .key("simplebank-remember-me-key")
+                        .tokenValiditySeconds(60 * 60 * 24 * 30) // 30 дней
+                        .rememberMeParameter("remember-me")
+                        .userDetailsService(userDetailsService(restTemplate))
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")

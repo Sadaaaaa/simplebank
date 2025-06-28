@@ -100,9 +100,11 @@
                     </h1>
                     <div class="d-flex align-items-center">
                         <span class="me-3">Добро пожаловать, <strong th:text="${username}">Пользователь</strong>!</span>
-                        <a href="/logout" class="logout-link">
-                            <i class="bi bi-box-arrow-right"></i> Выйти
-                        </a>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-link logout-link" style="text-decoration: none; padding: 0; border: none; background: none;">
+                                <i class="bi bi-box-arrow-right"></i> Выйти
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
