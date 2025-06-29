@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация успешна - SimpleBank</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .success-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 100%;
+            padding: 3rem;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #4bb71b;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #4bb71b;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #4bb71b;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+        
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px #4bb71b;
+            }
+        }
+        
+        .success-header {
+            margin-bottom: 2rem;
+        }
+        
+        .success-header h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .success-header p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .btn-custom {
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+        }
+        
+        .btn-secondary-custom {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border: none;
+            color: white;
+        }
+        
+        .features-list {
+            text-align: left;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+        }
+        
+        .features-list h5 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #555;
+        }
+        
+        .feature-item i {
+            color: #4bb71b;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .countdown {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <!-- Анимированная галочка успеха -->
+        <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="success-checkmark__check" fill="none" d="m14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        
+        <div class="success-header">
+            <h1>
+                <i class="bi bi-person-check text-success me-2"></i>
+                Регистрация успешна!
+            </h1>
+            <p>
+                Добро пожаловать в SimpleBank! Ваша учетная запись была успешно создана. 
+                Теперь вы можете войти в систему и начать пользоваться всеми возможностями нашего банка.
+            </p>
+        </div>
+        
+        <div class="features-list">
+            <h5><i class="bi bi-star me-2"></i>Что вас ждет:</h5>
+            <div class="feature-item">
+                <i class="bi bi-check-circle-fill"></i>
+                Безопасное управление счетами
+            </div>
+            <div class="feature-item">
+                <i class="bi bi-check-circle-fill"></i>
+                Быстрые переводы между счетами
+            </div>
+            <div class="feature-item">
+                <i class="bi bi-check-circle-fill"></i>
+                Переводы на другие аккаунты
+            </div>
+            <div class="feature-item">
+                <i class="bi bi-check-circle-fill"></i>
+                Мониторинг курсов валют
+            </div>
+            <div class="feature-item">
+                <i class="bi bi-check-circle-fill"></i>
+                Персональные настройки аккаунта
+            </div>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            <i class="bi bi-clock me-2"></i>
+            Автоматическое перенаправление через <span id="timer">5</span> секунд
+        </div>
+        
+        <div class="d-grid gap-2">
+            <a href="/login" class="btn btn-primary-custom btn-custom">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Войти в систему
+            </a>
+            
+            <a href="/" class="btn btn-secondary-custom btn-custom">
+                <i class="bi bi-house me-2"></i>
+                На главную
+            </a>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="row text-center">
+            <div class="col-4">
+                <div class="text-muted">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <small>Безопасность</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-muted">
+                    <i class="bi bi-check-circle text-success"></i>
+                    <small>Аккаунт создан</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-muted">
+                    <i class="bi bi-arrow-right text-info"></i>
+                    <small>Готов к работе</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Автоматическое перенаправление через 5 секунд
+        let countdown = 5;
+        const timerElement = document.getElementById('timer');
+        
+        const timer = setInterval(function() {
+            countdown--;
+            timerElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                window.location.href = '/login';
+            }
+        }, 1000);
+        
+        // Добавляем эффект пульсации для кнопки входа
+        const loginBtn = document.querySelector('.btn-primary-custom');
+        setInterval(function() {
+            loginBtn.style.transform = 'scale(1.05)';
+            setTimeout(function() {
+                loginBtn.style.transform = 'scale(1)';
+            }, 200);
+        }, 2000);
+    </script>
+</body>
+</html> 

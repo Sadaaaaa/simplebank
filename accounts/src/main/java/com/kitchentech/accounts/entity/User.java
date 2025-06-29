@@ -20,6 +20,9 @@ public class User {
     private Long id;
     private String username;
     private String password;
+    private String email;
+    private String firstName;
+    private String lastName;
     
     @Convert(converter = StringListConverter.class)
     private List<String> roles;

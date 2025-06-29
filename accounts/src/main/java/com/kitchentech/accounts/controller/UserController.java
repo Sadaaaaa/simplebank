@@ -1,52 +1,109 @@
 package com.kitchentech.accounts.controller;
 
-import com.kitchentech.accounts.dto.UserDetailsDto;
+import com.kitchentech.accounts.dto.UserRegistrationDto;
+import com.kitchentech.accounts.dto.UserRegistrationResponseDto;
 import com.kitchentech.accounts.entity.User;
 import com.kitchentech.accounts.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getUser(@PathVariable String username) {
-        log.info("Поиск пользователя: {}", username);
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
+    @PostMapping("/register")
+    public ResponseEntity<UserRegistrationResponseDto> registerUser(@RequestBody UserRegistrationDto registrationDto) {
+        log.info("🔄 Получен запрос на регистрацию пользователя: {}", registrationDto.getUsername());
+        log.info("📧 Email: {}, Имя: {}, Фамилия: {}", registrationDto.getEmail(), registrationDto.getFirstName(), registrationDto.getLastName());
+        
+        try {
+            // Проверяем, существует ли пользователь с таким username
+            if (userRepository.findByUsername(registrationDto.getUsername()).isPresent()) {
+                log.warn("❌ Пользователь с username {} уже существует", registrationDto.getUsername());
+                UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
+                errorResponse.setUsername(registrationDto.getUsername());
+                errorResponse.setEmail(registrationDto.getEmail());
+                errorResponse.setFirstName(registrationDto.getFirstName());
+                errorResponse.setLastName(registrationDto.getLastName());
+                errorResponse.setMessage("Username already exists");
+                errorResponse.setSuccess(false);
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // Проверяем, существует ли пользователь с таким email
+            if (userRepository.findByEmail(registrationDto.getEmail()).isPresent()) {
+                log.warn("❌ Пользователь с email {} уже существует", registrationDto.getEmail());
+                UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
+                errorResponse.setUsername(registrationDto.getUsername());
+                errorResponse.setEmail(registrationDto.getEmail());
+                errorResponse.setFirstName(registrationDto.getFirstName());
+                errorResponse.setLastName(registrationDto.getLastName());
+                errorResponse.setMessage("Email already exists");
+                errorResponse.setSuccess(false);
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // Создаем нового пользователя
+            User user = new User();
+            user.setUsername(registrationDto.getUsername());
+            user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+            user.setEmail(registrationDto.getEmail());
+            user.setFirstName(registrationDto.getFirstName());
+            user.setLastName(registrationDto.getLastName());
+            user.setRoles(Arrays.asList("USER"));
+
+            // Сохраняем пользователя
+            User savedUser = userRepository.save(user);
+            log.info("✅ Пользователь успешно зарегистрирован: {} (ID: {})", savedUser.getUsername(), savedUser.getId());
+
+            UserRegistrationResponseDto successResponse = new UserRegistrationResponseDto();
+            successResponse.setUsername(savedUser.getUsername());
+            successResponse.setEmail(savedUser.getEmail());
+            successResponse.setFirstName(savedUser.getFirstName());
+            successResponse.setLastName(savedUser.getLastName());
+            successResponse.setMessage("User registered successfully");
+            successResponse.setSuccess(true);
+
+            return ResponseEntity.ok(successResponse);
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка при регистрации пользователя {}: {}", registrationDto.getUsername(), e.getMessage(), e);
+            UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
+            errorResponse.setUsername(registrationDto.getUsername());
+            errorResponse.setEmail(registrationDto.getEmail());
+            errorResponse.setFirstName(registrationDto.getFirstName());
+            errorResponse.setLastName(registrationDto.getLastName());
+            errorResponse.setMessage("Internal server error: " + e.getMessage());
+            errorResponse.setSuccess(false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+        log.info("🔍 Поиск пользователя по username: {}", username);
+        
         return userRepository.findByUsername(username)
                 .map(user -> {
-                    UserDetailsDto userDto = new UserDetailsDto();
-                    userDto.setUsername(user.getUsername());
-                    userDto.setPassword(user.getPassword());
-                    userDto.setRoles(user.getRoles());
-                    userDto.setEnabled(user.getEnabled());
-                    
-                    return ResponseEntity.ok()
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .body((Object) userDto);
+                    log.info("✅ Пользователь найден: {}", username);
+                    return ResponseEntity.ok(user);
                 })
                 .orElseGet(() -> {
-                    Map<String, String> errorResponse = new HashMap<>();
-                    errorResponse.put("error", "User not found");
-                    errorResponse.put("message", "User with username '" + username + "' does not exist");
-                    return ResponseEntity.status(404)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .body((Object) errorResponse);
+                    log.warn("❌ Пользователь не найден: {}", username);
+                    return ResponseEntity.notFound().build();
                 });
     }
 }
