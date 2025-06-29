@@ -51,6 +51,7 @@ public class RouteConfig {
                                 .addRequestHeader("Accept", "application/json")
                                 .addRequestHeader("Content-Type", "application/json")
                                 .addResponseHeader("Content-Type", "application/json")
+                                .stripPrefix(1)
                                 .preserveHostHeader()
                                 .modifyResponseBody(String.class, String.class, (exchange, s) -> {
                                     log.info("🔄 Users route: {} -> {} (Registration request)", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
@@ -82,33 +83,5 @@ public class RouteConfig {
                         )
                         .uri("lb://auth-server"))
                 .build();
-    }
-}
-
-@Slf4j
-@Component
-class GlobalLoggingFilter implements GlobalFilter, Ordered {
-
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        log.info("🌐 Входящий запрос: {} {} -> {}", 
-                request.getMethod(), 
-                request.getPath(), 
-                request.getHeaders().get("Host"));
-        log.info("📋 Заголовки запроса: {}", request.getHeaders());
-        
-        return chain.filter(exchange)
-                .doFinally(signalType -> {
-                    log.info("📤 Исходящий ответ: {} {} -> {}", 
-                            request.getMethod(), 
-                            request.getPath(), 
-                            exchange.getResponse().getStatusCode());
-                });
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

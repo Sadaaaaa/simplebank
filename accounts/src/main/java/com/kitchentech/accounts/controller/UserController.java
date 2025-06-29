@@ -2,6 +2,7 @@ package com.kitchentech.accounts.controller;
 
 import com.kitchentech.accounts.dto.UserRegistrationDto;
 import com.kitchentech.accounts.dto.UserRegistrationResponseDto;
+import com.kitchentech.accounts.dto.ChangePasswordRequestDto;
 import com.kitchentech.accounts.entity.User;
 import com.kitchentech.accounts.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.security.Principal;
+import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -104,6 +107,29 @@ public class UserController {
                 .orElseGet(() -> {
                     log.warn("❌ Пользователь не найден: {}", username);
                     return ResponseEntity.notFound().build();
+                });
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequestDto request) {
+        String username = request.getUsername();
+        log.info("🔄 [change-password] Username из тела запроса: {}", username);
+        log.info("🔄 [change-password] Новый пароль: {}", request.getNewPassword());
+        if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
+            log.warn("❌ [change-password] Новый пароль не может быть пустым для пользователя: {}", username);
+            return ResponseEntity.badRequest().body(Map.of("message", "Пароль не может быть пустым"));
+        }
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    log.info("🔍 [change-password] Пользователь найден: {}", username);
+                    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                    userRepository.save(user);
+                    log.info("✅ [change-password] Пароль успешно изменён для пользователя: {}", username);
+                    return ResponseEntity.ok(Map.of("message", "Пароль успешно изменён"));
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ [change-password] Пользователь не найден: {}", username);
+                    return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
                 });
     }
 }

@@ -509,8 +509,26 @@
                 showAlert('Пароль не может быть пустым', 'danger');
                 return;
             }
-            
-            // Здесь будет API вызов для смены пароля
+
+            fetch('/dashboard/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newPassword })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showAlert('Пароль успешно изменен', 'success');
+                        document.getElementById('newPassword').value = '';
+                    } else {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                })
+                .catch(error => {
+                    showAlert('Ошибка: ' + error.message, 'danger');
+                });
+
             showAlert('Пароль успешно изменен', 'success');
             document.getElementById('newPassword').value = '';
         }
