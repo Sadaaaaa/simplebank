@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.kitchentech.frontui.dto.UserDetailsDto;
 
 @Slf4j
 @RequestMapping("/")
@@ -146,6 +147,29 @@ public class IndexPageController {
         if (authentication != null && authentication.isAuthenticated() && 
             !"anonymousUser".equals(authentication.getName())) {
             username = authentication.getName();
+            
+            // Загружаем данные пользователя
+            try {
+                String url = gatewayUrl + "/api/users/" + username;
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<?> entity = new HttpEntity<>(headers);
+                
+                ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        entity,
+                        UserDetailsDto.class
+                );
+                
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    UserDetailsDto userDetails = response.getBody();
+                    model.addAttribute("userDetails", userDetails);
+                    log.info("✅ Данные пользователя загружены: {}", username);
+                }
+            } catch (Exception e) {
+                log.warn("⚠️ Не удалось загрузить данные пользователя {}: {}", username, e.getMessage());
+            }
         }
         
         model.addAttribute("username", username);

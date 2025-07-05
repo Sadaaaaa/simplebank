@@ -133,4 +133,39 @@ public class UserController {
                     return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
                 });
     }
+
+    @PutMapping("/{username}/profile")
+    public ResponseEntity<Map<String, String>> updateProfile(@PathVariable String username, 
+                                                           @RequestBody UserRegistrationDto profileDto) {
+        log.info("🔄 [update-profile] Обновление профиля для пользователя: {}", username);
+        log.info("📧 [update-profile] Новые данные: firstName={}, lastName={}, email={}, birthDate={}", 
+                profileDto.getFirstName(), profileDto.getLastName(), profileDto.getEmail(), profileDto.getBirthDate());
+
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    log.info("🔍 [update-profile] Пользователь найден: {}", username);
+                    
+                    // Проверяем, не занят ли email другим пользователем
+                    if (!user.getEmail().equals(profileDto.getEmail())) {
+                        if (userRepository.findByEmail(profileDto.getEmail()).isPresent()) {
+                            log.warn("❌ [update-profile] Email {} уже занят другим пользователем", profileDto.getEmail());
+                            return ResponseEntity.badRequest().body(Map.of("message", "Email уже занят другим пользователем"));
+                        }
+                    }
+                    
+                    // Обновляем данные
+                    user.setFirstName(profileDto.getFirstName());
+                    user.setLastName(profileDto.getLastName());
+                    user.setEmail(profileDto.getEmail());
+                    user.setBirthDate(profileDto.getBirthDate());
+                    
+                    userRepository.save(user);
+                    log.info("✅ [update-profile] Профиль успешно обновлён для пользователя: {}", username);
+                    return ResponseEntity.ok(Map.of("message", "Профиль успешно обновлён"));
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ [update-profile] Пользователь не найден: {}", username);
+                    return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
+                });
+    }
 }
