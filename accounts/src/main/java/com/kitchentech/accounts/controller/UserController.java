@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.security.Principal;
 import java.util.Map;
 
@@ -30,8 +29,8 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserRegistrationResponseDto> registerUser(@RequestBody UserRegistrationDto registrationDto) {
         log.info("🔄 Получен запрос на регистрацию пользователя: {}", registrationDto.getUsername());
-        log.info("📧 Email: {}, Имя: {}, Фамилия: {}", registrationDto.getEmail(), registrationDto.getFirstName(), registrationDto.getLastName());
-        
+        log.info("📧 Email: {}, Имя: {}, Фамилия: {}, Дата рождения: {}", registrationDto.getEmail(), registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getBirthDate());
+
         try {
             // Проверяем, существует ли пользователь с таким username
             if (userRepository.findByUsername(registrationDto.getUsername()).isPresent()) {
@@ -66,7 +65,9 @@ public class UserController {
             user.setEmail(registrationDto.getEmail());
             user.setFirstName(registrationDto.getFirstName());
             user.setLastName(registrationDto.getLastName());
-            user.setRoles(Arrays.asList("USER"));
+            user.setBirthDate(registrationDto.getBirthDate());
+            user.setRoles("USER");
+            user.setEnabled(true);
 
             // Сохраняем пользователя
             User savedUser = userRepository.save(user);
@@ -98,7 +99,7 @@ public class UserController {
     @GetMapping("/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         log.info("🔍 Поиск пользователя по username: {}", username);
-        
+
         return userRepository.findByUsername(username)
                 .map(user -> {
                     log.info("✅ Пользователь найден: {}", username);

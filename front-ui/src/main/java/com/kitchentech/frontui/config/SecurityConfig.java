@@ -121,7 +121,7 @@ public class SecurityConfig {
                 
                 return User.withUsername(user.getUsername())
                         .password(user.getPassword())
-                        .roles(user.getRoles().toArray(new String[0]))
+                        .roles(user.getRoles())
                         .build();
             } catch (HttpClientErrorException e) {
                 log.error("❌ HTTP ошибка при поиске пользователя: статус={}, тело={}", e.getStatusCode(), e.getResponseBodyAsString());

@@ -1,19 +1,20 @@
 package com.kitchentech.accounts.entity;
 
 import com.kitchentech.accounts.config.StringListConverter;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +25,21 @@ public class User {
     private String firstName;
     private String lastName;
     
-    @Convert(converter = StringListConverter.class)
-    private List<String> roles;
+    // Временно убираем конвертер для отладки
+    // @Convert(converter = StringListConverter.class)
+    // @ElementCollection(fetch = FetchType.EAGER)
+    // private List<String> roles;
+    private String roles;
     
     private Boolean enabled;
+    private LocalDate birthDate;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    private LocalDateTime deletedAt;
 }

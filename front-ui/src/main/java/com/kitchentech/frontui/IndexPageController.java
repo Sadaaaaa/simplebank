@@ -58,6 +58,7 @@ public class IndexPageController {
                               @RequestParam String email,
                               @RequestParam String firstName,
                               @RequestParam String lastName,
+                              @RequestParam String birthDate,
                               Model model) {
         
         log.info("🔄 Начало регистрации пользователя: {}", username);
@@ -83,8 +84,9 @@ public class IndexPageController {
             registrationDto.setEmail(email);
             registrationDto.setFirstName(firstName);
             registrationDto.setLastName(lastName);
+            registrationDto.setBirthDate(java.time.LocalDate.parse(birthDate));
             
-            log.info("📤 Отправка данных регистрации: username={}, email={}", username, email);
+            log.info("📤 Отправка данных регистрации: username={}, email={}, birthDate={}", username, email, birthDate);
             
             // Настраиваем заголовки
             HttpHeaders headers = new HttpHeaders();

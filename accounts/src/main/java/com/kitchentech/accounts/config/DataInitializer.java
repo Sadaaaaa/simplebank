@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Slf4j
 @Component
+@Configuration
+@EnableJpaAuditing
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -29,7 +31,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setEmail("user@example.com");
             user.setFirstName("Тестовый");
             user.setLastName("Пользователь");
-            user.setRoles(List.of("USER"));
+            user.setRoles("USER");
             user.setEnabled(true);
             
             userRepository.save(user);

@@ -264,6 +264,20 @@
             <div class="mb-3">
                 <div class="input-group">
                     <span class="input-group-text">
+                        <i class="bi bi-calendar-event"></i>
+                    </span>
+                    <input type="date"
+                           class="form-control"
+                           id="birthDate"
+                           name="birthDate"
+                           placeholder="Дата рождения"
+                           required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">
                         <i class="bi bi-person-badge"></i>
                     </span>
                     <input type="text"
@@ -436,8 +450,26 @@
             const passwordStrength = checkPasswordStrength(password.value);
             const passwordsMatch = checkPasswordMatch();
             const termsAccepted = terms.checked;
+            const birthDate = document.getElementById('birthDate').value;
             
-            const isValid = passwordStrength >= 2 && passwordsMatch && termsAccepted;
+            // Проверка даты рождения
+            let birthDateValid = true;
+            if (birthDate) {
+                const selectedDate = new Date(birthDate);
+                const today = new Date();
+                const minAge = new Date();
+                minAge.setFullYear(today.getFullYear() - 18);
+                
+                if (selectedDate > today) {
+                    birthDateValid = false;
+                } else if (selectedDate > minAge) {
+                    birthDateValid = false;
+                }
+            } else {
+                birthDateValid = false;
+            }
+            
+            const isValid = passwordStrength >= 2 && passwordsMatch && termsAccepted && birthDateValid;
             submitBtn.disabled = !isValid;
         }
         
@@ -445,6 +477,7 @@
         password.addEventListener('input', validateForm);
         confirmPassword.addEventListener('input', validateForm);
         terms.addEventListener('change', validateForm);
+        document.getElementById('birthDate').addEventListener('input', validateForm);
         
         // Анимация при фокусе
         document.querySelectorAll('.form-control').forEach(input => {
