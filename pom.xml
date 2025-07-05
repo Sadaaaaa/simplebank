@@ -48,6 +48,7 @@
         <module>accounts</module>
         <module>gateway</module>
         <module>auth-server</module>
+        <module>cash</module>
     </modules>
 
     <dependencyManagement>

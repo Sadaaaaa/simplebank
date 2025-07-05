@@ -455,18 +455,52 @@
         }
 
         // Загрузка счетов пользователя
-        function loadUserAccounts() {
+        async function loadUserAccounts() {
             // Здесь будет API вызов для загрузки счетов
             // Пока используем моковые данные
             userAccounts = [
                 { id: 1, currency: 'RUB', balance: 50000, name: 'Основной счет' },
                 { id: 2, currency: 'USD', balance: 1000, name: 'Долларовый счет' }
             ];
-            updateAccountsUI();
+            await updateAccountsUI();
         }
 
         // Обновление UI счетов
-        function updateAccountsUI() {
+        async function updateAccountsUI() {
+            try {
+                // Получаем username из страницы
+                const usernameElement = document.querySelector('strong');
+                const username = usernameElement ? usernameElement.textContent : 'testuser';
+                
+                // Загружаем реальные данные с сервера
+                const response = await fetch(`/api/cash/accounts/${username}`);
+                if (response.ok) {
+                    const accounts = await response.json();
+                    userAccounts = accounts.map(account => ({
+                        id: account.id,
+                        currency: account.currency,
+                        balance: account.balance,
+                        name: account.name
+                    }));
+                } else {
+                    console.warn('Не удалось загрузить счета с сервера, используем моковые данные');
+                    // Используем моковые данные как fallback
+                    userAccounts = [
+                        { id: 1, currency: 'RUB', balance: 50000, name: 'Основной счет' },
+                        { id: 2, currency: 'USD', balance: 1500, name: 'Долларовый счет' },
+                        { id: 3, currency: 'EUR', balance: 1200, name: 'Евро счет' }
+                    ];
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке счетов:', error);
+                // Используем моковые данные как fallback
+                userAccounts = [
+                    { id: 1, currency: 'RUB', balance: 50000, name: 'Основной счет' },
+                    { id: 2, currency: 'USD', balance: 1500, name: 'Долларовый счет' },
+                    { id: 3, currency: 'EUR', balance: 1200, name: 'Евро счет' }
+                ];
+            }
+
             const accountsList = document.getElementById('accountsList');
             const selects = ['operationAccount', 'fromAccount', 'toAccount', 'myAccount'];
             
@@ -650,7 +684,7 @@
         }
 
         // Функции для работы с деньгами
-        function depositMoney() {
+        async function depositMoney() {
             const accountId = document.getElementById('operationAccount').value;
             const amount = parseFloat(document.getElementById('operationAmount').value);
 
@@ -659,15 +693,42 @@
                 return;
             }
 
-            // Здесь будет API вызов для пополнения
-            const account = userAccounts.find(acc => acc.id == accountId);
-            account.balance += amount;
-            updateAccountsUI();
-            showAlert(`Счет пополнен на ${amount} ${account.currency}`, 'success');
-            document.getElementById('operationAmount').value = '';
+            const operationData = {
+                accountId: parseInt(accountId),
+                amount: amount,
+                operationType: 'DEPOSIT'
+            };
+
+            try {
+                const response = await fetch('/api/cash/operation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(operationData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`Счет пополнен на ${amount} ₽. Новый баланс: ${result.newBalance} ₽`, 'success');
+                    document.getElementById('operationAmount').value = '';
+                    // Обновляем баланс в UI
+                    const account = userAccounts.find(acc => acc.id == accountId);
+                    if (account) {
+                        account.balance = result.newBalance;
+                        await updateAccountsUI();
+                    }
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка при пополнении счета:', error);
+                showAlert('Произошла ошибка при пополнении счета', 'danger');
+            }
         }
 
-        function withdrawMoney() {
+        async function withdrawMoney() {
             const accountId = document.getElementById('operationAccount').value;
             const amount = parseFloat(document.getElementById('operationAmount').value);
 
@@ -676,21 +737,43 @@
                 return;
             }
 
-            const account = userAccounts.find(acc => acc.id == accountId);
-            if (amount > account.balance) {
-                showAlert('Недостаточно средств на счете', 'danger');
-                return;
-            }
+            const operationData = {
+                accountId: parseInt(accountId),
+                amount: amount,
+                operationType: 'WITHDRAW'
+            };
 
-            // Здесь будет API вызов для снятия
-            account.balance -= amount;
-            updateAccountsUI();
-            showAlert(`Снято ${amount} ${account.currency}`, 'success');
-            document.getElementById('operationAmount').value = '';
+            try {
+                const response = await fetch('/api/cash/operation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(operationData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`Снято ${amount} ₽. Новый баланс: ${result.newBalance} ₽`, 'success');
+                    document.getElementById('operationAmount').value = '';
+                    // Обновляем баланс в UI
+                    const account = userAccounts.find(acc => acc.id == accountId);
+                    if (account) {
+                        account.balance = result.newBalance;
+                        await updateAccountsUI();
+                    }
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка при снятии денег:', error);
+                showAlert('Произошла ошибка при снятии денег', 'danger');
+            }
         }
 
         // Функции для переводов
-        function internalTransfer() {
+        async function internalTransfer() {
             const fromAccountId = document.getElementById('fromAccount').value;
             const toAccountId = document.getElementById('toAccount').value;
             const amount = parseFloat(document.getElementById('internalTransferAmount').value);
@@ -715,7 +798,7 @@
             fromAccount.balance -= amount;
             const toAccount = userAccounts.find(acc => acc.id == toAccountId);
             toAccount.balance += amount;
-            updateAccountsUI();
+            await updateAccountsUI();
             showAlert(`Перевод выполнен: ${amount} ${fromAccount.currency}`, 'success');
             document.getElementById('internalTransferAmount').value = '';
         }
@@ -735,7 +818,7 @@
                 ).join('');
         }
 
-        function externalTransfer() {
+        async function externalTransfer() {
             const myAccountId = document.getElementById('myAccount').value;
             const recipientAccountId = document.getElementById('recipientAccount').value;
             const amount = parseFloat(document.getElementById('externalTransferAmount').value);
@@ -753,7 +836,7 @@
 
             // Здесь будет API вызов для внешнего перевода
             myAccount.balance -= amount;
-            updateAccountsUI();
+            await updateAccountsUI();
             showAlert(`Перевод отправлен: ${amount} ${myAccount.currency}`, 'success');
             document.getElementById('externalTransferAmount').value = '';
         }
@@ -764,7 +847,7 @@
             modal.show();
         }
 
-        function addAccount() {
+        async function addAccount() {
             const currency = document.getElementById('accountCurrency').value;
             const name = document.getElementById('accountName').value;
 
@@ -789,7 +872,7 @@
             };
 
             userAccounts.push(newAccount);
-            updateAccountsUI();
+            await updateAccountsUI();
 
             const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
             modal.hide();

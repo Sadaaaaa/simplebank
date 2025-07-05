@@ -20,6 +20,7 @@ public class RouteConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         log.info("✅ Custom RouteLocator bean created");
+        log.info("🔍 Создаем маршруты...");
         return builder.routes()
                 .route("front_ui_route", r -> r
                         .path("/", "/login", "/register", "/register-success", "/dashboard", "/index")
@@ -31,6 +32,19 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://front-ui"))
+                .route("front_ui_api_route", r -> r
+                        .path("/api/cash/**")
+                        .filters(f -> f
+                                .addRequestHeader("Accept", "application/json")
+                                .addRequestHeader("Content-Type", "application/json")
+                                .addResponseHeader("Content-Type", "application/json")
+                                .preserveHostHeader()
+                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+                                    log.info("🔄 Front-UI API route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    return Mono.just(s != null ? s : "");
+                                })
+                        )
+                        .uri("lb://cash"))
                 .route("accounts_route", r -> r
                         .path("/api/accounts/**")
                         .filters(f -> f
@@ -82,6 +96,7 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://auth-server"))
+
                 .build();
     }
 }
