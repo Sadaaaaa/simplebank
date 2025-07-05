@@ -483,7 +483,7 @@
                             <button class="btn btn-outline-primary btn-sm me-1" onclick="editAccount(${account.id})">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAccount(${account.id})">
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteUserAccount(${account.id})">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -623,8 +623,29 @@
             }
 
             if (confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
-                // Здесь будет API вызов для удаления аккаунта
-                showAlert('Аккаунт успешно удален', 'success');
+                // Отправляем запрос на удаление аккаунта
+                fetch('/dashboard/delete-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result.includes('успешно') || result.includes('удалён')) {
+                        showAlert('Аккаунт успешно удален', 'success');
+                        // Перенаправляем на страницу выхода
+                        setTimeout(() => {
+                            window.location.href = '/logout';
+                        }, 2000);
+                    } else {
+                        showAlert('Ошибка при удалении аккаунта: ' + result, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showAlert('Ошибка при удалении аккаунта', 'danger');
+                });
             }
         }
 
@@ -788,7 +809,7 @@
             }
         }
 
-        function deleteAccount(accountId) {
+        function deleteUserAccount(accountId) {
             const account = userAccounts.find(acc => acc.id === accountId);
             
             if (account.balance > 0) {

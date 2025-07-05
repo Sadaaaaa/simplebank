@@ -168,4 +168,25 @@ public class UserController {
                     return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
                 });
     }
+
+    @DeleteMapping("/{username}")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
+        log.info("🔄 [delete-user] Удаление пользователя: {}", username);
+
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    log.info("🔍 [delete-user] Пользователь найден: {}", username);
+                    
+                    // Здесь можно добавить дополнительную логику проверки
+                    // Например, проверку баланса счетов, активных операций и т.д.
+                    
+                    userRepository.delete(user);
+                    log.info("✅ [delete-user] Пользователь успешно удалён: {}", username);
+                    return ResponseEntity.ok(Map.of("message", "Пользователь успешно удалён"));
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ [delete-user] Пользователь не найден: {}", username);
+                    return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
+                });
+    }
 }

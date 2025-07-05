@@ -90,4 +90,33 @@ public class DashboardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при обновлении профиля: " + e.getMessage());
         }
     }
+
+    @PostMapping("/delete-account")
+    @ResponseBody
+    public ResponseEntity<String> deleteAccount(HttpServletRequest servletRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication != null ? authentication.getName() : null;
+        log.info("🔄 DashboardController: удаление аккаунта для пользователя {}", username);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/users/" + username;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    entity,
+                    Map.class
+            );
+            log.info("✅ Ответ от gateway: {}", response.getStatusCode());
+            String message = response.getBody() != null ? (String) response.getBody().get("message") : "";
+            return ResponseEntity.status(response.getStatusCode()).body(message);
+        } catch (Exception e) {
+            log.error("❌ Ошибка при удалении аккаунта через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при удалении аккаунта: " + e.getMessage());
+        }
+    }
 } 
