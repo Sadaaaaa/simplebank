@@ -83,6 +83,84 @@ public class CashController {
         }
     }
 
+    @PostMapping("/accounts")
+    @ResponseBody
+    public ResponseEntity<Map> createAccount(@RequestBody Map<String, Object> accountData) {
+        log.info("🔄 CashController: создание нового счета {}", accountData);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/cash/accounts";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    Map.class
+            );
+            log.info("✅ Ответ от gateway для создания счета: {}", response.getStatusCode());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            log.error("❌ Ошибка при создании счета через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Ошибка при создании счета: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/accounts/{accountId}")
+    @ResponseBody
+    public ResponseEntity<Map> updateAccount(@PathVariable Long accountId, @RequestBody Map<String, Object> accountData) {
+        log.info("🔄 CashController: обновление счета с ID {}: {}", accountId, accountData);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/cash/accounts/" + accountId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    entity,
+                    Map.class
+            );
+            log.info("✅ Ответ от gateway для обновления счета: {}", response.getStatusCode());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            log.error("❌ Ошибка при обновлении счета через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Ошибка при обновлении счета: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/accounts/{accountId}")
+    @ResponseBody
+    public ResponseEntity<Map> deleteAccount(@PathVariable Long accountId) {
+        log.info("🔄 CashController: удаление счета с ID {}", accountId);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/cash/accounts/" + accountId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    entity,
+                    Map.class
+            );
+            log.info("✅ Ответ от gateway для удаления счета: {}", response.getStatusCode());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            log.error("❌ Ошибка при удалении счета через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Ошибка при удалении счета: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/health")
     @ResponseBody
     public ResponseEntity<String> health() {

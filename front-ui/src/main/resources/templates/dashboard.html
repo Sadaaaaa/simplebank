@@ -409,7 +409,7 @@
         let currencyRates = [];
 
         // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 Страница dashboard загружена');
             
             // Проверяем, загружены ли данные пользователя
@@ -424,14 +424,8 @@
             console.log('email:', email);
             console.log('birthDate:', birthDate);
             
-            // Инициализируем моковые данные для счетов
-            userAccounts = [
-                { id: 1, currency: 'RUB', balance: 10000, name: 'Основной счет' },
-                { id: 2, currency: 'USD', balance: 500, name: 'Долларовый счет' },
-                { id: 3, currency: 'EUR', balance: 300, name: 'Евро счет' }
-            ];
-            
-            updateAccountsUI();
+            // Загружаем реальные данные счетов
+            await updateAccountsUI();
             loadCurrencyRates();
             setupEventListeners();
         });
@@ -863,36 +857,79 @@
                 return;
             }
 
-            // Здесь будет API вызов для создания счета
-            const newAccount = {
-                id: Date.now(),
-                currency: currency,
-                balance: 0,
-                name: name || `${currency} счет`
-            };
+            try {
+                // Получаем username из страницы
+                const usernameElement = document.querySelector('strong');
+                const username = usernameElement ? usernameElement.textContent : 'Asdfg1';
+                
+                const accountData = {
+                    userId: 4, // ID пользователя Asdfg1
+                    username: username,
+                    currency: currency,
+                    name: name || `${currency} счет`,
+                    balance: 0
+                };
 
-            userAccounts.push(newAccount);
-            await updateAccountsUI();
+                const response = await fetch('/api/cash/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(accountData)
+                });
 
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
-            modal.hide();
-            
-            document.getElementById('addAccountForm').reset();
-            showAlert(`Счет в валюте ${currency} создан`, 'success');
+                if (response.ok) {
+                    const newAccount = await response.json();
+                    await updateAccountsUI();
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
+                    modal.hide();
+                    
+                    document.getElementById('addAccountForm').reset();
+                    showAlert(`Счет в валюте ${currency} создан`, 'success');
+                } else {
+                    const errorData = await response.json();
+                    showAlert(`Ошибка при создании счета: ${errorData.message || 'Неизвестная ошибка'}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка при создании счета:', error);
+                showAlert('Произошла ошибка при создании счета', 'danger');
+            }
         }
 
-        function editAccount(accountId) {
+        async function editAccount(accountId) {
             const account = userAccounts.find(acc => acc.id === accountId);
             const newName = prompt('Введите новое название счета:', account.name);
             
             if (newName !== null && newName.trim()) {
-                account.name = newName.trim();
-                updateAccountsUI();
-                showAlert('Название счета обновлено', 'success');
+                try {
+                    const accountData = {
+                        name: newName.trim()
+                    };
+
+                    const response = await fetch(`/api/cash/accounts/${accountId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(accountData)
+                    });
+
+                    if (response.ok) {
+                        await updateAccountsUI();
+                        showAlert('Название счета обновлено', 'success');
+                    } else {
+                        const errorData = await response.json();
+                        showAlert(`Ошибка при обновлении счета: ${errorData.message || 'Неизвестная ошибка'}`, 'danger');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при обновлении счета:', error);
+                    showAlert('Произошла ошибка при обновлении счета', 'danger');
+                }
             }
         }
 
-        function deleteUserAccount(accountId) {
+        async function deleteUserAccount(accountId) {
             const account = userAccounts.find(acc => acc.id === accountId);
             
             if (account.balance > 0) {
@@ -901,9 +938,25 @@
             }
 
             if (confirm(`Удалить счет ${account.name}?`)) {
-                userAccounts = userAccounts.filter(acc => acc.id !== accountId);
-                updateAccountsUI();
-                showAlert('Счет удален', 'success');
+                try {
+                    const response = await fetch(`/api/cash/accounts/${accountId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        await updateAccountsUI();
+                        showAlert('Счет удален', 'success');
+                    } else {
+                        const errorData = await response.json();
+                        showAlert(`Ошибка при удалении счета: ${errorData.message || 'Неизвестная ошибка'}`, 'danger');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при удалении счета:', error);
+                    showAlert('Произошла ошибка при удалении счета', 'danger');
+                }
             }
         }
 

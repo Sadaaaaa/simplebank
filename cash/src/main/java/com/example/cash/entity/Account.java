@@ -33,4 +33,10 @@ public class Account {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+    
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+    
+    @Column(name = "deleted_by")
+    private String deletedBy;
 } 

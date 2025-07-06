@@ -12,4 +12,13 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByUsernameAndActiveTrue(String username);
     List<Account> findByUserIdAndActiveTrue(Long userId);
     Optional<Account> findByIdAndActiveTrue(Long id);
+    
+    // Методы для работы с soft delete
+    List<Account> findByUsernameAndDeletedAtIsNull(String username);
+    List<Account> findByUserIdAndDeletedAtIsNull(Long userId);
+    Optional<Account> findByIdAndDeletedAtIsNull(Long id);
+    
+    // Методы для восстановления удаленных счетов
+    List<Account> findByUsernameAndDeletedAtIsNotNull(String username);
+    List<Account> findByUserIdAndDeletedAtIsNotNull(Long userId);
 } 

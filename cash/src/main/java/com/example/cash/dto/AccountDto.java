@@ -3,6 +3,7 @@ package com.example.cash.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class AccountDto {
@@ -13,4 +14,8 @@ public class AccountDto {
     private String name;
     private BigDecimal balance;
     private Boolean active;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    private String deletedBy;
 } 
