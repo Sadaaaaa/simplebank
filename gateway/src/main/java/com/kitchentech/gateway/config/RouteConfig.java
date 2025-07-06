@@ -96,7 +96,19 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://auth-server"))
-
+                .route("transfer_route", r -> r
+                        .path("/api/transfer/**")
+                        .filters(f -> f
+                                .addRequestHeader("Accept", "application/json")
+                                .addRequestHeader("Content-Type", "application/json")
+                                .addResponseHeader("Content-Type", "application/json")
+                                .preserveHostHeader()
+                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+                                    log.info("🔄 Transfer route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    return Mono.just(s != null ? s : "");
+                                })
+                        )
+                        .uri("lb://transfer"))
                 .build();
     }
 }

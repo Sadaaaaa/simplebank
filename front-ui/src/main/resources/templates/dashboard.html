@@ -798,33 +798,78 @@
                 return;
             }
 
-            // Здесь будет API вызов для внутреннего перевода
-            fromAccount.balance -= amount;
-            const toAccount = userAccounts.find(acc => acc.id == toAccountId);
-            toAccount.balance += amount;
-            await updateAccountsUI();
-            showAlert(`Перевод выполнен: ${amount} ${fromAccount.currency}`, 'success');
-            document.getElementById('internalTransferAmount').value = '';
+            const transferData = {
+                fromAccountId: parseInt(fromAccountId),
+                toAccountId: parseInt(toAccountId),
+                amount: amount,
+                description: 'Внутренний перевод между счетами'
+            };
+
+            try {
+                const response = await fetch('/api/transfer/internal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(transferData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`Перевод выполнен успешно! ID: ${result.transferId}`, 'success');
+                    document.getElementById('internalTransferAmount').value = '';
+                    
+                    // Обновляем балансы в UI
+                    const fromAcc = userAccounts.find(acc => acc.id == fromAccountId);
+                    const toAcc = userAccounts.find(acc => acc.id == toAccountId);
+                    if (fromAcc && toAcc) {
+                        fromAcc.balance = result.fromAccountNewBalance;
+                        toAcc.balance = result.toAccountNewBalance;
+                        await updateAccountsUI();
+                    }
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка при выполнении внутреннего перевода:', error);
+                showAlert('Произошла ошибка при выполнении перевода', 'danger');
+            }
         }
 
-        function searchRecipient(username) {
-            // Здесь будет API вызов для поиска получателя
-            // Пока используем моковые данные
-            const recipientAccounts = [
-                { id: 101, currency: 'RUB', name: 'Основной счет' },
-                { id: 102, currency: 'USD', name: 'Долларовый счет' }
-            ];
+        async function searchRecipient(username) {
+            if (!username || username.trim() === '') {
+                showAlert('Введите логин получателя', 'danger');
+                return;
+            }
 
-            const select = document.getElementById('recipientAccount');
-            select.innerHTML = '<option value="">Выберите счет получателя</option>' + 
-                recipientAccounts.map(account => 
-                    `<option value="${account.id}">${account.name} (${account.currency})</option>`
-                ).join('');
+            try {
+                const response = await fetch(`/api/transfer/accounts/${username.trim()}`);
+                const accounts = await response.json();
+
+                const select = document.getElementById('recipientAccount');
+                select.innerHTML = '<option value="">Выберите счет получателя</option>';
+                
+                if (accounts && accounts.length > 0) {
+                    accounts.forEach(account => {
+                        const option = document.createElement('option');
+                        option.value = account.id;
+                        option.textContent = `${account.name} (${account.currency}) - Баланс: ${account.balance}`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    showAlert('Счета получателя не найдены', 'warning');
+                }
+            } catch (error) {
+                console.error('Ошибка при поиске получателя:', error);
+                showAlert('Ошибка при поиске получателя', 'danger');
+            }
         }
 
         async function externalTransfer() {
             const myAccountId = document.getElementById('myAccount').value;
             const recipientAccountId = document.getElementById('recipientAccount').value;
+            const recipientUsername = document.getElementById('recipientUsername').value;
             const amount = parseFloat(document.getElementById('externalTransferAmount').value);
 
             if (!myAccountId || !recipientAccountId || !amount || amount <= 0) {
@@ -838,11 +883,45 @@
                 return;
             }
 
-            // Здесь будет API вызов для внешнего перевода
-            myAccount.balance -= amount;
-            await updateAccountsUI();
-            showAlert(`Перевод отправлен: ${amount} ${myAccount.currency}`, 'success');
-            document.getElementById('externalTransferAmount').value = '';
+            const transferData = {
+                fromAccountId: parseInt(myAccountId),
+                toAccountId: parseInt(recipientAccountId),
+                amount: amount,
+                fromUsername: document.getElementById('username').value,
+                toUsername: recipientUsername,
+                description: 'Внешний перевод между пользователями'
+            };
+
+            try {
+                const response = await fetch('/api/transfer/external', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(transferData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`Перевод выполнен успешно! ID: ${result.transferId}`, 'success');
+                    document.getElementById('externalTransferAmount').value = '';
+                    document.getElementById('recipientUsername').value = '';
+                    document.getElementById('recipientAccount').innerHTML = '<option value="">Сначала выберите получателя</option>';
+                    
+                    // Обновляем баланс отправителя в UI
+                    const fromAcc = userAccounts.find(acc => acc.id == myAccountId);
+                    if (fromAcc) {
+                        fromAcc.balance = result.fromAccountNewBalance;
+                        await updateAccountsUI();
+                    }
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка при выполнении внешнего перевода:', error);
+                showAlert('Произошла ошибка при выполнении перевода', 'danger');
+            }
         }
 
         // Функции для работы со счетами

@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
 
             // Создаем тестовые счета
             Account account1 = new Account();
-            account1.setUserId(4L); // ID пользователя Asdfg1
+            account1.setUserId(1L); // ID пользователя Asdfg1
             account1.setUsername("Asdfg1");
             account1.setCurrency("RUB");
             account1.setName("Основной счет");
@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
             accountRepository.save(account1);
 
             Account account2 = new Account();
-            account2.setUserId(4L); // ID пользователя Asdfg1
+            account2.setUserId(1L); // ID пользователя Asdfg1
             account2.setUsername("Asdfg1");
             account2.setCurrency("USD");
             account2.setName("Долларовый счет");
@@ -48,7 +48,7 @@ public class DataInitializer implements CommandLineRunner {
             accountRepository.save(account2);
 
             Account account3 = new Account();
-            account3.setUserId(4L); // ID пользователя Asdfg1
+            account3.setUserId(1L); // ID пользователя Asdfg1
             account3.setCurrency("EUR");
             account3.setUsername("Asdfg1");
             account3.setName("Евро счет");

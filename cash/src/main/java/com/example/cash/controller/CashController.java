@@ -64,6 +64,28 @@ public class CashController {
         return ResponseEntity.ok(accountDtos);
     }
     
+    @GetMapping("/accounts/id/{accountId}")
+    public ResponseEntity<AccountDto> getAccountById(@PathVariable Long accountId) {
+        log.info("Получение счета по ID: {}", accountId);
+        
+        try {
+            Account account = accountRepository.findByIdAndDeletedAtIsNull(accountId)
+                    .orElse(null);
+            
+            if (account != null) {
+                AccountDto dto = convertToDto(account);
+                log.info("Найден счет с ID: {}", accountId);
+                return ResponseEntity.ok(dto);
+            } else {
+                log.warn("Счет с ID {} не найден", accountId);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при получении счета с ID {}: {}", accountId, e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
     @PostMapping("/accounts")
     public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
         log.info("Создание нового счета: {}", accountDto);

@@ -49,6 +49,7 @@
         <module>gateway</module>
         <module>auth-server</module>
         <module>cash</module>
+        <module>transfer</module>
     </modules>
 
     <dependencyManagement>
