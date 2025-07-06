@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -117,6 +118,34 @@ public class DashboardController {
         } catch (Exception e) {
             log.error("❌ Ошибка при удалении аккаунта через gateway: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при удалении аккаунта: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user-info")
+    @ResponseBody
+    public ResponseEntity<Map> getUserInfo(HttpServletRequest servletRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication != null ? authentication.getName() : null;
+        log.info("🔄 DashboardController: получение информации о пользователе {}", username);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/users/" + username;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+            log.info("✅ Ответ от gateway для получения информации о пользователе: {}", response.getStatusCode());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            log.error("❌ Ошибка при получении информации о пользователе через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка при получении информации о пользователе: " + e.getMessage()));
         }
     }
 } 

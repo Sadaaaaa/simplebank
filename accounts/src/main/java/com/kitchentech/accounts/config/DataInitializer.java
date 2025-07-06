@@ -21,8 +21,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Проверяем, есть ли уже пользователь "user"
-        if (userRepository.findByUsername("user").isEmpty()) {
+        log.info("🚀 Инициализация тестовых данных для accounts сервиса...");
+        
+        // Очищаем старые данные для пересоздания
+        userRepository.deleteAll();
+        log.info("🗑️ Очищены старые данные пользователей");
+        
+        // Проверяем, есть ли уже активный пользователь "user"
+        if (userRepository.findByUsernameAndDeletedAtIsNull("user").isEmpty()) {
             log.info("Создание тестового пользователя 'user'");
             
             User user = new User();

@@ -83,6 +83,38 @@ public class CashController {
         }
     }
 
+    @GetMapping("/accounts/user/{userId}")
+    @ResponseBody
+    public ResponseEntity<List<Map>> getUserAccountsById(@PathVariable Long userId) {
+        log.info("🔄 CashController: получение счетов для пользователя с ID {}", userId);
+
+        // Формируем запрос к gateway
+        String url = gatewayUrl + "/api/cash/accounts/user/" + userId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Object[]> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    Object[].class
+            );
+            log.info("✅ Ответ от gateway для получения счетов по userId: {}", response.getStatusCode());
+            
+            // Преобразуем Object[] в List<Map>
+            List<Map> accounts = java.util.Arrays.stream(response.getBody())
+                    .map(item -> (Map) item)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.status(response.getStatusCode()).body(accounts);
+        } catch (Exception e) {
+            log.error("❌ Ошибка при получении счетов по userId через gateway: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
+        }
+    }
+
     @PostMapping("/accounts")
     @ResponseBody
     public ResponseEntity<Map> createAccount(@RequestBody Map<String, Object> accountData) {

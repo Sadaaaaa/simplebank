@@ -42,4 +42,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
+    
+    @Column(name = "deleted_by")
+    private String deletedBy;
 }

@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -32,8 +33,8 @@ public class UserController {
         log.info("📧 Email: {}, Имя: {}, Фамилия: {}, Дата рождения: {}", registrationDto.getEmail(), registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getBirthDate());
 
         try {
-            // Проверяем, существует ли пользователь с таким username
-            if (userRepository.findByUsername(registrationDto.getUsername()).isPresent()) {
+            // Проверяем, существует ли активный пользователь с таким username
+            if (userRepository.findByUsernameAndDeletedAtIsNull(registrationDto.getUsername()).isPresent()) {
                 log.warn("❌ Пользователь с username {} уже существует", registrationDto.getUsername());
                 UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
                 errorResponse.setUsername(registrationDto.getUsername());
@@ -45,8 +46,8 @@ public class UserController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
-            // Проверяем, существует ли пользователь с таким email
-            if (userRepository.findByEmail(registrationDto.getEmail()).isPresent()) {
+            // Проверяем, существует ли активный пользователь с таким email
+            if (userRepository.findByEmailAndDeletedAtIsNull(registrationDto.getEmail()).isPresent()) {
                 log.warn("❌ Пользователь с email {} уже существует", registrationDto.getEmail());
                 UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
                 errorResponse.setUsername(registrationDto.getUsername());
@@ -98,9 +99,9 @@ public class UserController {
 
     @GetMapping("/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        log.info("🔍 Поиск пользователя по username: {}", username);
+        log.info("🔍 Поиск активного пользователя по username: {}", username);
 
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("✅ Пользователь найден: {}", username);
                     return ResponseEntity.ok(user);
@@ -120,7 +121,7 @@ public class UserController {
             log.warn("❌ [change-password] Новый пароль не может быть пустым для пользователя: {}", username);
             return ResponseEntity.badRequest().body(Map.of("message", "Пароль не может быть пустым"));
         }
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("🔍 [change-password] Пользователь найден: {}", username);
                     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -141,13 +142,13 @@ public class UserController {
         log.info("📧 [update-profile] Новые данные: firstName={}, lastName={}, email={}, birthDate={}", 
                 profileDto.getFirstName(), profileDto.getLastName(), profileDto.getEmail(), profileDto.getBirthDate());
 
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("🔍 [update-profile] Пользователь найден: {}", username);
                     
-                    // Проверяем, не занят ли email другим пользователем
+                    // Проверяем, не занят ли email другим активным пользователем
                     if (!user.getEmail().equals(profileDto.getEmail())) {
-                        if (userRepository.findByEmail(profileDto.getEmail()).isPresent()) {
+                        if (userRepository.findByEmailAndDeletedAtIsNull(profileDto.getEmail()).isPresent()) {
                             log.warn("❌ [update-profile] Email {} уже занят другим пользователем", profileDto.getEmail());
                             return ResponseEntity.badRequest().body(Map.of("message", "Email уже занят другим пользователем"));
                         }
@@ -170,23 +171,52 @@ public class UserController {
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
-        log.info("🔄 [delete-user] Удаление пользователя: {}", username);
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username, 
+                                                         @RequestParam(required = false) String deletedBy) {
+        log.info("🔄 [delete-user] Soft delete пользователя: {} пользователем: {}", username, deletedBy);
 
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("🔍 [delete-user] Пользователь найден: {}", username);
                     
                     // Здесь можно добавить дополнительную логику проверки
                     // Например, проверку баланса счетов, активных операций и т.д.
                     
-                    userRepository.delete(user);
-                    log.info("✅ [delete-user] Пользователь успешно удалён: {}", username);
+                    // Soft delete - помечаем как удаленный
+                    user.setEnabled(false);
+                    user.setDeletedAt(LocalDateTime.now());
+                    user.setDeletedBy(deletedBy != null ? deletedBy : "system");
+                    
+                    userRepository.save(user);
+                    log.info("✅ [delete-user] Пользователь помечен как удаленный (soft delete): {}", username);
                     return ResponseEntity.ok(Map.of("message", "Пользователь успешно удалён"));
                 })
                 .orElseGet(() -> {
                     log.warn("❌ [delete-user] Пользователь не найден: {}", username);
                     return ResponseEntity.status(404).body(Map.of("message", "Пользователь не найден"));
+                });
+    }
+
+    @PostMapping("/{username}/restore")
+    public ResponseEntity<Map<String, String>> restoreUser(@PathVariable String username) {
+        log.info("🔄 [restore-user] Восстановление пользователя: {}", username);
+
+        return userRepository.findByUsernameAndDeletedAtIsNotNull(username)
+                .map(user -> {
+                    log.info("🔍 [restore-user] Удаленный пользователь найден: {}", username);
+                    
+                    // Восстанавливаем пользователя
+                    user.setEnabled(true);
+                    user.setDeletedAt(null);
+                    user.setDeletedBy(null);
+                    
+                    userRepository.save(user);
+                    log.info("✅ [restore-user] Пользователь успешно восстановлен: {}", username);
+                    return ResponseEntity.ok(Map.of("message", "Пользователь успешно восстановлен"));
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ [restore-user] Удаленный пользователь не найден: {}", username);
+                    return ResponseEntity.status(404).body(Map.of("message", "Удаленный пользователь не найден"));
                 });
     }
 }
