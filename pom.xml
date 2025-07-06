@@ -50,6 +50,8 @@
         <module>auth-server</module>
         <module>cash</module>
         <module>transfer</module>
+        <module>exchange-generator</module>
+        <module>exchange</module>
     </modules>
 
     <dependencyManagement>

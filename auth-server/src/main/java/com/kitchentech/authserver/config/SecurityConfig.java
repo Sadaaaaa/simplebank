@@ -54,20 +54,36 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient registeredClient = RegisteredClient
+        RegisteredClient gatewayClient = RegisteredClient
                 .withId(UUID.randomUUID().toString())
                 .clientId("gateway-client")
                 .clientSecret("{noop}secret")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
                 .scope(OidcScopes.OPENID)
                 .scope("read")
                 .scope("write")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        RegisteredClient exchangeGeneratorClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("exchange-generator-client")
+                .clientSecret("exchange-secret")
+                .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
+
+        System.out.println("🔐 Зарегистрированные клиенты:");
+        System.out.println("🔐 Gateway Client ID: " + gatewayClient.getClientId());
+        System.out.println("🔐 Gateway Client Secret: " + gatewayClient.getClientSecret());
+        System.out.println("🔐 Exchange Generator Client ID: " + exchangeGeneratorClient.getClientId());
+        System.out.println("🔐 Exchange Generator Client Secret: " + exchangeGeneratorClient.getClientSecret());
+
+        return new InMemoryRegisteredClientRepository(gatewayClient, exchangeGeneratorClient);
     }
 
     @Bean
@@ -100,35 +116,6 @@ public class SecurityConfig {
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-//        return username -> {
-//
-//            RestTemplate restTemplate = new RestTemplate();
-//            ResponseEntity<UserDetailsDto> response = restTemplate.getForEntity(
-//                    "http://localhost:8091/api/users/" + username, UserDetailsDto.class
-//            );
-//
-//            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-//                throw new UsernameNotFoundException("User not found");
-//            }
-//
-//            UserDetailsDto user = response.getBody();
-//            return User.withUsername(user.getUsername())
-//                    .password(user.getPassword())
-//                    .roles(user.getRoles().toArray(new String[0]))
-//                    .build();
-//        };
-
-        return new InMemoryUserDetailsManager(
-                User.withUsername("user")
-                        .password(passwordEncoder().encode("password"))
-                        .roles("USER")
-                        .build()
-        );
     }
 
     @Bean

@@ -542,15 +542,45 @@
         }
 
         // Загрузка курсов валют
-        function loadCurrencyRates() {
-            // Здесь будет API вызов для загрузки курсов
-            // Пока используем моковые данные
-            currencyRates = [
-                { currency: 'USD', buy: 95.50, sell: 96.20 },
-                { currency: 'EUR', buy: 103.80, sell: 104.50 },
-                { currency: 'CNY', buy: 13.20, sell: 13.40 }
-            ];
-            updateCurrencyRatesUI();
+        async function loadCurrencyRates() {
+            try {
+                const response = await fetch('/api/exchange/rates');
+                if (!response.ok) throw new Error('Ошибка загрузки курсов валют');
+                const rates = await response.json();
+
+                // RUB всегда 1 к 1
+                currencyRates = [
+                    {
+                        currency: 'USD',
+                        buy: formatRate(getRate(rates, 'RUB', 'USD')),
+                        sell: formatRate(getRate(rates, 'USD', 'RUB'))
+                    },
+                    {
+                        currency: 'EUR',
+                        buy: formatRate(getRate(rates, 'RUB', 'EUR')),
+                        sell: formatRate(getRate(rates, 'EUR', 'RUB'))
+                    }
+                ];
+                updateCurrencyRatesUI();
+            } catch (error) {
+                console.error('Ошибка при загрузке курсов валют:', error);
+                // Можно оставить старые значения или показать ошибку
+            }
+        }
+
+        function getRate(rates, from, to) {
+            const found = rates.find(r => r.fromCurrency === from && r.toCurrency === to);
+            return found ? found.rate : '-';
+        }
+
+        function formatRate(rate) {
+            if (typeof rate === 'number') {
+                return rate.toFixed(4);
+            }
+            if (typeof rate === 'string' && !isNaN(rate)) {
+                return Number(rate).toFixed(4);
+            }
+            return rate;
         }
 
         // Обновление UI курсов валют
