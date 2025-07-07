@@ -100,6 +100,15 @@ public class TransferService {
                 response.setFromAccountNewBalance(updatedFromAccount.getBalance());
                 response.setToAccountNewBalance(updatedToAccount.getBalance());
                 log.info("✅ Внутренний перевод выполнен успешно: {}", response.getTransferId());
+                sendExchangeFact(
+                    fromAccount.getUserId(),
+                    fromAccount.getCurrency(),
+                    toAccount.getCurrency(),
+                    amountToWithdraw,
+                    amountToDeposit,
+                    (!fromAccount.getCurrency().equals(toAccount.getCurrency()) ? getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency()) : BigDecimal.ONE),
+                    true // internal
+                );
             } else {
                 response.setSuccess(false);
                 response.setMessage("Ошибка при выполнении перевода");
@@ -159,6 +168,15 @@ public class TransferService {
                 response.setFromAccountNewBalance(updatedFromAccount.getBalance());
                 response.setToAccountNewBalance(updatedToAccount.getBalance());
                 log.info("✅ Внешний перевод выполнен успешно: {}", response.getTransferId());
+                sendExchangeFact(
+                    fromAccount.getUserId(),
+                    fromAccount.getCurrency(),
+                    toAccount.getCurrency(),
+                    amountToWithdraw,
+                    amountToDeposit,
+                    (!fromAccount.getCurrency().equals(toAccount.getCurrency()) ? getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency()) : BigDecimal.ONE),
+                    false // external
+                );
             } else {
                 response.setSuccess(false);
                 response.setMessage("Ошибка при выполнении перевода");
@@ -294,6 +312,28 @@ public class TransferService {
         } catch (Exception e) {
             log.error("❌ Ошибка при выполнении операций с деньгами: {}", e.getMessage(), e);
             return false;
+        }
+    }
+
+    private void sendExchangeFact(Long userId, String fromCurrency, String toCurrency, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal rate, boolean internal) {
+        try {
+            Map<String, Object> fact = Map.of(
+                "userId", userId,
+                "fromCurrency", fromCurrency,
+                "toCurrency", toCurrency,
+                "amountFrom", amountFrom,
+                "amountTo", amountTo,
+                "rate", rate,
+                "date", LocalDateTime.now().toString(),
+                "internal", internal
+            );
+            String url = gatewayUrl + "/api/exchange/convert";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(fact, headers);
+            restTemplate.postForEntity(url, entity, Void.class);
+        } catch (Exception e) {
+            log.error("❌ Не удалось отправить факт обмена валюты: {}", e.getMessage(), e);
         }
     }
 } 

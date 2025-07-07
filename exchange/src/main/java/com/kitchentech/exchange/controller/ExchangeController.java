@@ -1,5 +1,6 @@
 package com.kitchentech.exchange.controller;
 
+import com.kitchentech.exchange.dto.CurrencyExchangeFactDto;
 import com.kitchentech.exchange.dto.ExchangeRateDto;
 import com.kitchentech.exchange.service.ExchangeService;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,11 @@ public class ExchangeController {
     @GetMapping("/rates")
     public ResponseEntity<List<ExchangeRateDto>> getLatestRates() {
         return ResponseEntity.ok(exchangeService.getLatestRates());
+    }
+
+    @PostMapping("/convert")
+    public ResponseEntity<Void> saveExchangeFact(@RequestBody CurrencyExchangeFactDto factDto) {
+        exchangeService.saveExchangeFact(factDto);
+        return ResponseEntity.ok().build();
     }
 } 
