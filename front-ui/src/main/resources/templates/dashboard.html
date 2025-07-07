@@ -359,7 +359,7 @@
                             </table>
                         </div>
                         <div class="text-center">
-                            <small class="text-muted">Курсы обновляются каждые 5 минут</small>
+                            <small class="text-muted">Курсы обновляются каждую минуту</small>
                         </div>
                     </div>
                 </div>
@@ -544,7 +544,7 @@
         // Загрузка курсов валют
         async function loadCurrencyRates() {
             try {
-                const response = await fetch('/api/exchange/rates');
+                const response = await fetch('/dashboard/exchange-rates');
                 if (!response.ok) throw new Error('Ошибка загрузки курсов валют');
                 const rates = await response.json();
 
@@ -552,13 +552,13 @@
                 currencyRates = [
                     {
                         currency: 'USD',
-                        buy: formatRate(getRate(rates, 'RUB', 'USD')),
-                        sell: formatRate(getRate(rates, 'USD', 'RUB'))
+                        buy: formatRate(getRate(rates, 'USD', 'RUB')), // Покупка: сколько RUB за 1 USD
+                        sell: formatRate(1 / getRate(rates, 'RUB', 'USD')) // Продажа: сколько RUB за 1 USD (инверсия)
                     },
                     {
                         currency: 'EUR',
-                        buy: formatRate(getRate(rates, 'RUB', 'EUR')),
-                        sell: formatRate(getRate(rates, 'EUR', 'RUB'))
+                        buy: formatRate(getRate(rates, 'EUR', 'RUB')),
+                        sell: formatRate(1 / getRate(rates, 'RUB', 'EUR'))
                     }
                 ];
                 updateCurrencyRatesUI();
@@ -574,7 +574,7 @@
         }
 
         function formatRate(rate) {
-            if (typeof rate === 'number') {
+            if (typeof rate === 'number' && isFinite(rate)) {
                 return rate.toFixed(4);
             }
             if (typeof rate === 'string' && !isNaN(rate)) {
@@ -1125,7 +1125,7 @@
         }
 
         // Автообновление курсов валют
-        setInterval(loadCurrencyRates, 300000); // каждые 5 минут
+        setInterval(loadCurrencyRates, 60000); // каждые 1 минуту
     </script>
 </body>
 </html>

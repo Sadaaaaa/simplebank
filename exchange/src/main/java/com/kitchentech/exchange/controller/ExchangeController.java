@@ -14,16 +14,14 @@ import java.util.List;
 public class ExchangeController {
     private final ExchangeService exchangeService;
 
-    // Получение актуальных курсов для фронта
-    @GetMapping("/rates")
-    public ResponseEntity<List<ExchangeRateDto>> getRates() {
-        return ResponseEntity.ok(exchangeService.getLatestRates());
+    @PostMapping("/rates")
+    public ResponseEntity<Void> updateRates(@RequestBody List<ExchangeRateDto> rates) {
+        exchangeService.updateRates(rates);
+        return ResponseEntity.ok().build();
     }
 
-    // Приём новых курсов от генератора
-    @PostMapping("/rates")
-    public ResponseEntity<Void> saveRates(@RequestBody List<ExchangeRateDto> rates) {
-        exchangeService.saveRates(rates);
-        return ResponseEntity.ok().build();
+    @GetMapping("/rates")
+    public ResponseEntity<List<ExchangeRateDto>> getLatestRates() {
+        return ResponseEntity.ok(exchangeService.getLatestRates());
     }
 } 
