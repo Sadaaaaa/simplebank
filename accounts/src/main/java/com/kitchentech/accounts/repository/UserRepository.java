@@ -4,6 +4,7 @@ import com.kitchentech.accounts.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Методы для восстановления удаленных пользователей
     Optional<User> findByUsernameAndDeletedAtIsNotNull(String username);
     Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
+    List<User> findAllByDeletedAtIsNull();
 } 

@@ -309,7 +309,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Получатель *</label>
-                                    <input type="text" class="form-control" id="recipientUsername" placeholder="Логин получателя" required>
+                                    <select class="form-select" id="recipientUsername" required>
+                                        <option value="">Выберите пользователя</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -407,6 +409,7 @@
         // Глобальные переменные
         let userAccounts = [];
         let currencyRates = [];
+        let allUsers = [];
 
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async function() {
@@ -428,6 +431,7 @@
             await updateAccountsUI();
             loadCurrencyRates();
             setupEventListeners();
+            await loadUsersForTransfer(); // Загружаем пользователей для перевода
         });
 
         // Настройка обработчиков событий
@@ -873,8 +877,17 @@
                 return;
             }
 
+            // Найти userId по username в allUsers
+            const user = allUsers.find(u => (u.username || u.login || u) === username.trim());
+            const userId = user && (user.id || user.userId);
+            if (!userId) {
+                showAlert('Пользователь не найден', 'danger');
+                document.getElementById('recipientAccount').innerHTML = '<option value="">Сначала выберите получателя</option>';
+                return;
+            }
+
             try {
-                const response = await fetch(`/api/transfer/accounts/${username.trim()}`);
+                const response = await fetch(`/api/cash/accounts/user/${userId}`);
                 const accounts = await response.json();
 
                 const select = document.getElementById('recipientAccount');
@@ -1082,6 +1095,23 @@
                     console.error('Ошибка при удалении счета:', error);
                     showAlert('Произошла ошибка при удалении счета', 'danger');
                 }
+            }
+        }
+
+        async function loadUsersForTransfer() {
+            try {
+                const response = await fetch('/dashboard/users');
+                if (!response.ok) throw new Error('Ошибка загрузки пользователей');
+                allUsers = await response.json();
+                const recipientUsernameSelect = document.getElementById('recipientUsername');
+                recipientUsernameSelect.innerHTML = '<option value="">Выберите пользователя</option>';
+                allUsers.forEach(user => {
+                    // user.username или user.login — зависит от структуры
+                    const username = user.username || user.login || user;
+                    recipientUsernameSelect.innerHTML += `<option value="${username}">${username}</option>`;
+                });
+            } catch (error) {
+                console.error('Ошибка при загрузке пользователей:', error);
             }
         }
 

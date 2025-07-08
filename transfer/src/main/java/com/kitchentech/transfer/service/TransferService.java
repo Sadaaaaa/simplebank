@@ -3,6 +3,8 @@ package com.kitchentech.transfer.service;
 import com.kitchentech.transfer.dto.AccountInfoDto;
 import com.kitchentech.transfer.dto.TransferRequestDto;
 import com.kitchentech.transfer.dto.TransferResponseDto;
+import com.kitchentech.transfer.entity.TransferHistory;
+import com.kitchentech.transfer.repository.TransferHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class TransferService {
 
     private final RestTemplate restTemplate;
+    private final TransferHistoryRepository historyRepository;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -147,13 +150,64 @@ public class TransferService {
                 response.setMessage("Недостаточно средств на счете отправителя");
                 return response;
             }
+            // 1. Проверка через blocker
+            boolean allowed = true;
+            String blockReason = "";
+            try {
+                Map<String, Object> blockReq = Map.of(
+                    "fromUserId", fromAccount.getUserId(),
+                    "toUserId", toAccount.getUserId(),
+                    "amount", request.getAmount(),
+                    "currency", fromAccount.getCurrency()
+                );
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(blockReq, headers);
+                ResponseEntity<Map> blockResp = restTemplate.exchange(
+                    gatewayUrl + "/api/blocker/check-transfer",
+                    HttpMethod.POST,
+                    entity,
+                    Map.class
+                );
+                if (blockResp.getStatusCode().is2xxSuccessful() && blockResp.getBody() != null) {
+                    allowed = Boolean.TRUE.equals(blockResp.getBody().get("allowed"));
+                    blockReason = (String) blockResp.getBody().get("reason");
+                }
+            } catch (Exception e) {
+                log.error("❌ Ошибка при проверке через blocker: {}", e.getMessage(), e);
+                allowed = false;
+                blockReason = "Ошибка связи с сервисом blocker";
+            }
+            // 2. Сохраняем историю
             BigDecimal amountToWithdraw = request.getAmount();
             BigDecimal amountToDeposit = amountToWithdraw;
+            BigDecimal rate = BigDecimal.ONE;
             if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
-                BigDecimal rate = getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency());
+                rate = getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency());
                 amountToDeposit = amountToWithdraw.multiply(rate);
-                log.info("💱 Внешний перевод с конвертацией: {} {} -> {} {} по курсу {}", amountToWithdraw, fromAccount.getCurrency(), amountToDeposit, toAccount.getCurrency(), rate);
             }
+            TransferHistory history = new TransferHistory();
+            history.setFromUserId(fromAccount.getUserId());
+            history.setToUserId(toAccount.getUserId());
+            history.setFromAccountId(fromAccount.getId());
+            history.setToAccountId(toAccount.getId());
+            history.setFromCurrency(fromAccount.getCurrency());
+            history.setToCurrency(toAccount.getCurrency());
+            history.setAmountFrom(amountToWithdraw);
+            history.setAmountTo(amountToDeposit);
+            history.setRate(rate);
+            history.setDate(LocalDateTime.now());
+            history.setAllowed(allowed);
+            history.setBlockReason(blockReason);
+            history.setInternal(false);
+            historyRepository.save(history);
+            // 3. Если не разрешено — возвращаем ошибку
+            if (!allowed) {
+                response.setSuccess(false);
+                response.setMessage("Перевод заблокирован: " + blockReason);
+                return response;
+            }
+            // 4. Выполняем перевод через cash сервис
             boolean success = performCashOperations(fromAccount.getId(), toAccount.getId(), amountToWithdraw, amountToDeposit);
             if (success) {
                 response.setSuccess(true);
@@ -174,7 +228,7 @@ public class TransferService {
                     toAccount.getCurrency(),
                     amountToWithdraw,
                     amountToDeposit,
-                    (!fromAccount.getCurrency().equals(toAccount.getCurrency()) ? getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency()) : BigDecimal.ONE),
+                    rate,
                     false // external
                 );
             } else {

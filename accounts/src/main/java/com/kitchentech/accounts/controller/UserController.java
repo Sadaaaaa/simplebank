@@ -3,6 +3,7 @@ package com.kitchentech.accounts.controller;
 import com.kitchentech.accounts.dto.UserRegistrationDto;
 import com.kitchentech.accounts.dto.UserRegistrationResponseDto;
 import com.kitchentech.accounts.dto.ChangePasswordRequestDto;
+import com.kitchentech.accounts.dto.UserDetailsDto;
 import com.kitchentech.accounts.entity.User;
 import com.kitchentech.accounts.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -110,6 +113,23 @@ public class UserController {
                     log.warn("❌ Пользователь не найден: {}", username);
                     return ResponseEntity.notFound().build();
                 });
+    }
+
+    @GetMapping
+    public List<UserDetailsDto> getAllUsers() {
+        return userRepository.findAllByDeletedAtIsNull()
+                .stream()
+                .map(user -> {
+                    UserDetailsDto dto = new UserDetailsDto();
+                    dto.setId(user.getId());
+                    dto.setUsername(user.getUsername());
+//                    dto.setEmail(user.getEmail());
+//                    dto.setFirstName(user.getFirstName());
+//                    dto.setLastName(user.getLastName());
+                    dto.setRoles(user.getRoles() != null ? List.of(user.getRoles().split(",")) : List.of());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/change-password")
