@@ -60,5 +60,36 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             log.info("ℹ️ Тестовые данные уже существуют ({} счетов)", accountRepository.count());
         }
+        // Добавляем счета для второго пользователя (userId=2, username='user2')
+        if (accountRepository.findAll().stream().noneMatch(a -> a.getUserId() != null && a.getUserId() == 2L)) {
+            log.info("Создание счетов для пользователя user2 (id=2)");
+            Account acc1 = new Account();
+            acc1.setUserId(2L);
+            acc1.setUsername("user2");
+            acc1.setCurrency("RUB");
+            acc1.setName("Основной счет");
+            acc1.setBalance(new BigDecimal("100000.00"));
+            acc1.setActive(true);
+            accountRepository.save(acc1);
+
+            Account acc2 = new Account();
+            acc2.setUserId(2L);
+            acc2.setUsername("user2");
+            acc2.setCurrency("USD");
+            acc2.setName("Долларовый счет");
+            acc2.setBalance(new BigDecimal("2000.00"));
+            acc2.setActive(true);
+            accountRepository.save(acc2);
+
+            Account acc3 = new Account();
+            acc3.setUserId(2L);
+            acc3.setUsername("user2");
+            acc3.setCurrency("EUR");
+            acc3.setName("Евро счет");
+            acc3.setBalance(new BigDecimal("1500.00"));
+            acc3.setActive(true);
+            accountRepository.save(acc3);
+            log.info("Счета для пользователя user2 созданы");
+        }
     }
 } 

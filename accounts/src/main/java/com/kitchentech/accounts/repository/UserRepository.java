@@ -2,7 +2,10 @@ package com.kitchentech.accounts.repository;
 
 import com.kitchentech.accounts.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,4 +23,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameAndDeletedAtIsNotNull(String username);
     Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
     List<User> findAllByDeletedAtIsNull();
-} 
+
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true, value = "  truncate table users restart identity ")
+    void truncateTable();
+}

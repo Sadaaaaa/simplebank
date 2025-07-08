@@ -1105,10 +1105,13 @@
                 allUsers = await response.json();
                 const recipientUsernameSelect = document.getElementById('recipientUsername');
                 recipientUsernameSelect.innerHTML = '<option value="">Выберите пользователя</option>';
+                // Получаем текущий username
+                const currentUsername = document.getElementById('username').value;
                 allUsers.forEach(user => {
-                    // user.username или user.login — зависит от структуры
                     const username = user.username || user.login || user;
-                    recipientUsernameSelect.innerHTML += `<option value="${username}">${username}</option>`;
+                    if (username !== currentUsername) {
+                        recipientUsernameSelect.innerHTML += `<option value="${username}">${username}</option>`;
+                    }
                 });
             } catch (error) {
                 console.error('Ошибка при загрузке пользователей:', error);
