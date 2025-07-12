@@ -231,6 +231,13 @@ public class TransferService {
                     rate,
                     false // external
                 );
+                
+                // Отправляем уведомления
+                String fromMessage = String.format("Списано %.2f %s со счета %s", amountToWithdraw, fromAccount.getCurrency(), fromAccount.getName());
+                String toMessage = String.format("Зачислено %.2f %s на счет %s", amountToDeposit, toAccount.getCurrency(), toAccount.getName());
+                
+                sendNotification(fromAccount.getUserId(), fromMessage);
+                sendNotification(toAccount.getUserId(), toMessage);
             } else {
                 response.setSuccess(false);
                 response.setMessage("Ошибка при выполнении перевода");
@@ -388,6 +395,24 @@ public class TransferService {
             restTemplate.postForEntity(url, entity, Void.class);
         } catch (Exception e) {
             log.error("❌ Не удалось отправить факт обмена валюты: {}", e.getMessage(), e);
+        }
+    }
+
+    private void sendNotification(Long userId, String message) {
+        try {
+            Map<String, Object> notification = Map.of(
+                "userId", userId,
+                "message", message,
+                "read", false
+            );
+            String url = gatewayUrl + "/api/notifications/create";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notification, headers);
+            restTemplate.postForEntity(url, entity, Void.class);
+            log.info("✅ Уведомление отправлено пользователю {}: {}", userId, message);
+        } catch (Exception e) {
+            log.error("❌ Не удалось отправить уведомление пользователю {}: {}", userId, e.getMessage(), e);
         }
     }
 } 
