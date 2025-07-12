@@ -112,6 +112,15 @@ public class TransferService {
                     (!fromAccount.getCurrency().equals(toAccount.getCurrency()) ? getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency()) : BigDecimal.ONE),
                     true // internal
                 );
+                
+                // Отправляем уведомления для внутреннего перевода
+                String fromMessage = String.format("Переведено %.2f %s со счета %s на счет %s", 
+                    amountToWithdraw, fromAccount.getCurrency(), fromAccount.getName(), toAccount.getName());
+                String toMessage = String.format("Получено %.2f %s на счет %s со счета %s", 
+                    amountToDeposit, toAccount.getCurrency(), toAccount.getName(), fromAccount.getName());
+                
+                sendNotification(fromAccount.getUserId(), fromMessage);
+                sendNotification(toAccount.getUserId(), toMessage);
             } else {
                 response.setSuccess(false);
                 response.setMessage("Ошибка при выполнении перевода");

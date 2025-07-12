@@ -6,10 +6,16 @@ import com.example.cash.entity.Account;
 import com.example.cash.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +23,10 @@ import java.math.BigDecimal;
 public class CashService {
     
     private final AccountRepository accountRepository;
+    private final RestTemplate restTemplate;
+    
+    @Value("${gateway.url:http://localhost:8081}")
+    private String gatewayUrl;
     
     @Transactional
     public CashOperationResponseDto performOperation(CashOperationDto operationDto) {
@@ -44,9 +54,19 @@ public class CashService {
                 
                 account.setBalance(currentBalance.subtract(amount));
                 log.info("Снято {} с счета {}. Новый баланс: {}", amount, account.getId(), account.getBalance());
+                
+                // Отправляем уведомление о снятии
+                sendNotification(account.getUserId(), 
+                    String.format("Снято %.2f %s со счета %s", amount, account.getCurrency(), account.getName()));
+                
             } else if ("DEPOSIT".equals(operationDto.getOperationType())) {
                 account.setBalance(currentBalance.add(amount));
                 log.info("Внесено {} на счет {}. Новый баланс: {}", amount, account.getId(), account.getBalance());
+                
+                // Отправляем уведомление о пополнении
+                sendNotification(account.getUserId(), 
+                    String.format("Внесено %.2f %s на счет %s", amount, account.getCurrency(), account.getName()));
+                
             } else {
                 throw new RuntimeException("Неизвестный тип операции: " + operationDto.getOperationType());
             }
@@ -65,5 +85,23 @@ public class CashService {
         }
         
         return response;
+    }
+    
+    private void sendNotification(Long userId, String message) {
+        try {
+            Map<String, Object> notification = Map.of(
+                "userId", userId,
+                "message", message,
+                "read", false
+            );
+            String url = gatewayUrl + "/api/notifications/create";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notification, headers);
+            restTemplate.postForEntity(url, entity, Void.class);
+            log.info("✅ Уведомление отправлено пользователю {}: {}", userId, message);
+        } catch (Exception e) {
+            log.error("❌ Не удалось отправить уведомление пользователю {}: {}", userId, e.getMessage(), e);
+        }
     }
 } 

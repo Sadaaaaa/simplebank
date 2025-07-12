@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleBank - Панель управления</title>
+    <title>SimpleBank</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -119,288 +119,287 @@
     </style>
 </head>
 <body>
-    <div class="container-fluid dashboard-container">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h1 class="mb-0">
-                        <i class="bi bi-bank2 text-primary"></i>
-                        SimpleBank - Панель управления
-                    </h1>
-                    <div class="d-flex align-items-center">
-                        <span class="me-3">Добро пожаловать, <strong th:text="${username}">Пользователь</strong>!</span>
-                        <!-- Колокольчик уведомлений -->
-                        <div class="position-relative me-3">
-                            <button type="button" class="btn btn-link" onclick="showNotificationsModal()" style="text-decoration: none; padding: 0; border: none; background: none;">
-                                <i class="bi bi-bell fs-4"></i>
-                                <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
-                                    0
-                                </span>
-                            </button>
+    <!-- Верхняя панель -->
+    <div class="container d-flex justify-content-center">
+        <div class="col-lg-8">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="mb-0">
+                            <i class="bi bi-bank2 text-primary"></i>
+                            SimpleBank
+                        </h1>
+                        <div class="d-flex align-items-center">
+                            <span class="me-3">Добро пожаловать, <strong th:text="${username}">Пользователь</strong>!</span>
+                            <!-- Колокольчик уведомлений -->
+                            <div class="position-relative me-3">
+                                <button type="button" class="btn btn-link" onclick="showNotificationsModal()" style="text-decoration: none; padding: 0; border: none; background: none;">
+                                    <i class="bi bi-bell fs-4"></i>
+                                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                        0
+                                    </span>
+                                </button>
+                            </div>
+                            <form th:action="@{/logout}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-link logout-link" style="text-decoration: none; padding: 0; border: none; background: none;">
+                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                </button>
+                            </form>
                         </div>
-                        <form th:action="@{/logout}" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-link logout-link" style="text-decoration: none; padding: 0; border: none; background: none;">
-                                <i class="bi bi-box-arrow-right"></i> Выйти
-                            </button>
-                        </form>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <!-- Блок настроек аккаунта -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-gear-fill me-2"></i>
-                            Настройки аккаунта
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Основная информация -->
-                        <form id="accountForm">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Логин</label>
-                                    <input type="text" class="form-control" id="username" th:value="${username}" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Действия</label>
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteAccount()">
-                                            <i class="bi bi-trash"></i> Удалить аккаунт
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Смена пароля -->
-                            <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label class="form-label">Новый пароль</label>
-                                    <input type="password" class="form-control" id="newPassword" placeholder="Введите новый пароль">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">&nbsp;</label>
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-primary" onclick="changePassword()">
-                                            <i class="bi bi-key"></i> Изменить пароль
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Личная информация -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Фамилия</label>
-                                    <input type="text" class="form-control" id="lastName" 
-                                           th:value="${userDetails?.lastName}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Имя</label>
-                                    <input type="text" class="form-control" id="firstName" 
-                                           th:value="${userDetails?.firstName}" required>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" 
-                                           th:value="${userDetails?.email}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Дата рождения</label>
-                                    <input type="date" class="form-control" id="birthDate" 
-                                           th:value="${userDetails?.birthDate}" required>
-                                </div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="button" class="btn btn-primary" onclick="savePersonalInfo()">
-                                    <i class="bi bi-check-circle"></i> Сохранить информацию
-                                </button>
-                            </div>
-                        </form>
-
-                        <!-- Счета пользователя -->
-                        <hr class="my-4">
-                        <h6><i class="bi bi-credit-card me-2"></i>Мои счета</h6>
-                        <div id="accountsList">
-                            <!-- Счета будут загружены динамически -->
-                        </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="showAddAccountModal()">
-                            <i class="bi bi-plus-circle"></i> Добавить счет
+    </div>
+    <!-- Центральный контейнер с accordion -->
+    <div class="container d-flex flex-column align-items-center justify-content-center">
+        <div class="col-lg-8">
+            <div class="accordion" id="dashboardAccordion">
+                <!-- Настройки аккаунта -->
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="headingAccount">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccount" aria-expanded="true" aria-controls="collapseAccount">
+                            <i class="bi bi-gear-fill me-2"></i> Настройки аккаунта
                         </button>
+                    </h2>
+                    <div id="collapseAccount" class="accordion-collapse collapse show" aria-labelledby="headingAccount">
+                        <div class="accordion-body">
+                            <!-- Содержимое блока настроек аккаунта (перенести сюда весь card-body) -->
+                            <form id="accountForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Логин</label>
+                                        <input type="text" class="form-control" id="username" th:value="${username}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Действия</label>
+                                        <div class="d-grid">
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteAccount()">
+                                                <i class="bi bi-trash"></i> Удалить аккаунт
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Новый пароль</label>
+                                        <input type="password" class="form-control" id="newPassword" placeholder="Введите новый пароль">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="d-grid">
+                                            <button type="button" class="btn btn-primary" onclick="changePassword()">
+                                                <i class="bi bi-key"></i> Изменить пароль
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Фамилия</label>
+                                        <input type="text" class="form-control" id="lastName" 
+                                           th:value="${userDetails?.lastName}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Имя</label>
+                                        <input type="text" class="form-control" id="firstName" 
+                                           th:value="${userDetails?.firstName}" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" 
+                                           th:value="${userDetails?.email}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Дата рождения</label>
+                                        <input type="date" class="form-control" id="birthDate" 
+                                           th:value="${userDetails?.birthDate}" required>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-primary" onclick="savePersonalInfo()">
+                                        <i class="bi bi-check-circle"></i> Сохранить информацию
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Счета пользователя -->
+                            <hr class="my-4">
+                            <h6><i class="bi bi-credit-card me-2"></i>Мои счета</h6>
+                            <div id="accountsList">
+                                <!-- Счета будут загружены динамически -->
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="showAddAccountModal()">
+                                <i class="bi bi-plus-circle"></i> Добавить счет
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Блок внесения и снятия денег -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-cash-stack me-2"></i>
-                            Внесение и снятие денег
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="moneyOperationForm">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Выберите счет *</label>
-                                    <select class="form-select" id="operationAccount" required>
-                                        <option value="">Выберите счет</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Сумма *</label>
-                                    <input type="number" class="form-control" id="operationAmount" step="0.01" min="0" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-success" onclick="depositMoney()">
-                                            <i class="bi bi-plus-circle"></i> Положить
-                                        </button>
+                <!-- Блок внесения и снятия денег -->
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="headingMoneyOperations">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMoneyOperations" aria-expanded="true" aria-controls="collapseMoneyOperations">
+                            <i class="bi bi-cash-stack me-2"></i> Внесение и снятие денег
+                        </button>
+                    </h2>
+                    <div id="collapseMoneyOperations" class="accordion-collapse collapse show" aria-labelledby="headingMoneyOperations">
+                        <div class="accordion-body">
+                            <form id="moneyOperationForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Выберите счет *</label>
+                                        <select class="form-select" id="operationAccount" required>
+                                            <option value="">Выберите счет</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Сумма *</label>
+                                        <input type="number" class="form-control" id="operationAmount" step="0.01" min="0" required>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-warning" onclick="withdrawMoney()">
-                                            <i class="bi bi-dash-circle"></i> Снять
-                                        </button>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-grid">
+                                            <button type="button" class="btn btn-success" onclick="depositMoney()">
+                                                <i class="bi bi-plus-circle"></i> Положить
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-grid">
+                                            <button type="button" class="btn btn-warning" onclick="withdrawMoney()">
+                                                <i class="bi bi-dash-circle"></i> Снять
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Блок перевода между своими счетами -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-arrow-left-right me-2"></i>
-                            Перевод между счетами
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="internalTransferForm">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Счет отправителя *</label>
-                                    <select class="form-select" id="fromAccount" required>
-                                        <option value="">Выберите счет</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Счет получателя *</label>
-                                    <select class="form-select" id="toAccount" required>
-                                        <option value="">Выберите счет</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label class="form-label">Сумма перевода *</label>
-                                    <input type="number" class="form-control" id="internalTransferAmount" step="0.01" min="0" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">&nbsp;</label>
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-primary" onclick="internalTransfer()">
-                                            <i class="bi bi-arrow-right"></i> Перевести
-                                        </button>
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="headingInternalTransfer">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInternalTransfer" aria-expanded="true" aria-controls="collapseInternalTransfer">
+                            <i class="bi bi-arrow-left-right me-2"></i> Перевод между счетами
+                        </button>
+                    </h2>
+                    <div id="collapseInternalTransfer" class="accordion-collapse collapse show" aria-labelledby="headingInternalTransfer">
+                        <div class="accordion-body">
+                            <form id="internalTransferForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Счет отправителя *</label>
+                                        <select class="form-select" id="fromAccount" required>
+                                            <option value="">Выберите счет</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Счет получателя *</label>
+                                        <select class="form-select" id="toAccount" required>
+                                            <option value="">Выберите счет</option>
+                                        </select>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Блок перевода на другой аккаунт -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-person-plus me-2"></i>
-                            Перевод на другой аккаунт
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="externalTransferForm">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Мой счет *</label>
-                                    <select class="form-select" id="myAccount" required>
-                                        <option value="">Выберите счет</option>
-                                    </select>
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Сумма перевода *</label>
+                                        <input type="number" class="form-control" id="internalTransferAmount" step="0.01" min="0" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="d-grid">
+                                            <button type="button" class="btn btn-primary" onclick="internalTransfer()">
+                                                <i class="bi bi-arrow-right"></i> Перевести
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Получатель *</label>
-                                    <select class="form-select" id="recipientUsername" required>
-                                        <option value="">Выберите пользователя</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Счет получателя *</label>
-                                    <select class="form-select" id="recipientAccount" required>
-                                        <option value="">Сначала выберите получателя</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Сумма *</label>
-                                    <input type="number" class="form-control" id="externalTransferAmount" step="0.01" min="0" required>
-                                </div>
-                            </div>
-                            <div class="d-grid">
-                                <button type="button" class="btn btn-primary" onclick="externalTransfer()">
-                                    <i class="bi bi-send"></i> Отправить перевод
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Блок курсов валют -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-currency-exchange me-2"></i>
-                            Курсы валют
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Валюта</th>
-                                        <th>Покупка</th>
-                                        <th>Продажа</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="currencyRatesTable">
-                                    <!-- Курсы валют будут загружены динамически -->
-                                </tbody>
-                            </table>
+                            </form>
                         </div>
-                        <div class="text-center">
-                            <small class="text-muted">Курсы обновляются каждую минуту</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion" id="dashboardAccordion">
+                <!-- Блок перевода на другой аккаунт -->
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="headingExternalTransfer">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExternalTransfer" aria-expanded="true" aria-controls="collapseExternalTransfer">
+                            <i class="bi bi-person-plus me-2"></i> Перевод на другой аккаунт
+                        </button>
+                    </h2>
+                    <div id="collapseExternalTransfer" class="accordion-collapse collapse show" aria-labelledby="headingExternalTransfer">
+                        <div class="accordion-body">
+                            <form id="externalTransferForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Мой счет *</label>
+                                        <select class="form-select" id="myAccount" required>
+                                            <option value="">Выберите счет</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Получатель *</label>
+                                        <select class="form-select" id="recipientUsername" required>
+                                            <option value="">Выберите пользователя</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Счет получателя *</label>
+                                        <select class="form-select" id="recipientAccount" required>
+                                            <option value="">Сначала выберите получателя</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Сумма *</label>
+                                        <input type="number" class="form-control" id="externalTransferAmount" step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-primary" onclick="externalTransfer()">
+                                        <i class="bi bi-send"></i> Отправить перевод
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок курсов валют -->
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="headingCurrencyRates">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCurrencyRates" aria-expanded="true" aria-controls="collapseCurrencyRates">
+                            <i class="bi bi-currency-exchange me-2"></i> Курсы валют
+                        </button>
+                    </h2>
+                    <div id="collapseCurrencyRates" class="accordion-collapse collapse show" aria-labelledby="headingCurrencyRates">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Валюта</th>
+                                            <th>Покупка</th>
+                                            <th>Продажа</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="currencyRatesTable">
+                                        <!-- Курсы валют будут загружены динамически -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted">Курсы обновляются каждую минуту</small>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -23,7 +23,7 @@ public class NotificationService {
     }
 
     public List<Notification> getUnreadNotifications(Long userId) {
-        return notificationRepository.findByUserIdAndReadFalse(userId);
+        return notificationRepository.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId);
     }
 
     public void markAsRead(Long notificationId) {
@@ -34,7 +34,7 @@ public class NotificationService {
     }
 
     public List<Notification> getAllNotifications(Long userId) {
-        return notificationRepository.findByUserId(userId);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     public Notification createNotification(Long userId, String message) {
