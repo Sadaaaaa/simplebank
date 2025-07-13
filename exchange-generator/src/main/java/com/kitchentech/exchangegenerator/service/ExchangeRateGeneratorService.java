@@ -6,13 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +26,10 @@ import java.util.*;
 public class ExchangeRateGeneratorService {
 
     private final RestTemplate restTemplate;
+    private final OAuth2AuthorizedClientManager authorizedClientManager; // Добавить
 
-    @Value("${exchange.service.url}")
-    private String exchangeServiceUrl;
+    @Value("${gateway.url}")
+    private String gatewayUrl;
 
     @Value("${auth.server.url}")
     private String authServerUrl;
@@ -109,9 +116,26 @@ public class ExchangeRateGeneratorService {
 
     private void sendRatesToExchangeService(List<ExchangeRateDto> rates) {
         try {
-            String url = exchangeServiceUrl + "/api/exchange/rates";
+            OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
+                    .withClientRegistrationId("auth-server")
+                    .principal("exchange-generator-service") // любой уникальный идентификатор
+                    .build();
+
+            OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+
+            if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+                log.error("❌ Не удалось получить токен доступа");
+                return;
+            }
+
+            String accessToken = authorizedClient.getAccessToken().getTokenValue();
+            log.info("🔐 Получен токен доступа: {}", accessToken.substring(0, Math.min(20, accessToken.length())) + "...");
+
+
+            String url = gatewayUrl + "/api/exchange/rates";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(accessToken); // Добавить токен в заголовок
 
             HttpEntity<List<ExchangeRateDto>> entity = new HttpEntity<>(rates, headers);
             

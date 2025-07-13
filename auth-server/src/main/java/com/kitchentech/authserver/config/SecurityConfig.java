@@ -10,18 +10,16 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.KeyPair;
@@ -39,6 +37,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults());  // Включаем форму логина
@@ -54,10 +53,11 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
+
         RegisteredClient gatewayClient = RegisteredClient
                 .withId(UUID.randomUUID().toString())
                 .clientId("gateway-client")
-                .clientSecret("{noop}secret")
+                .clientSecret("{noop}gateway-secret")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
@@ -70,20 +70,36 @@ public class SecurityConfig {
         RegisteredClient exchangeGeneratorClient = RegisteredClient
                 .withId(UUID.randomUUID().toString())
                 .clientId("exchange-generator-client")
-                .clientSecret("exchange-secret")
+                .clientSecret("{noop}exchange-generator-secret")
                 .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scope("read")
                 .scope("write")
                 .build();
 
-        System.out.println("🔐 Зарегистрированные клиенты:");
-        System.out.println("🔐 Gateway Client ID: " + gatewayClient.getClientId());
-        System.out.println("🔐 Gateway Client Secret: " + gatewayClient.getClientSecret());
-        System.out.println("🔐 Exchange Generator Client ID: " + exchangeGeneratorClient.getClientId());
-        System.out.println("🔐 Exchange Generator Client Secret: " + exchangeGeneratorClient.getClientSecret());
+        RegisteredClient exchangeClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("exchange-client")
+                .clientSecret("{noop}exchange-secret")
+                .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
 
-        return new InMemoryRegisteredClientRepository(gatewayClient, exchangeGeneratorClient);
+        RegisteredClient accountsClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("accounts-client")
+                .clientSecret("{noop}accounts-secret")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
+
+        return new InMemoryRegisteredClientRepository(gatewayClient, exchangeGeneratorClient, exchangeClient, accountsClient);
     }
 
     @Bean
@@ -120,6 +136,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
