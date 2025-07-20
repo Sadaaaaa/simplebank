@@ -37,4 +37,8 @@ public class SecurityConfig {
         log.info("✅ SecurityWebFilterChain настроен");
         return http.build();
     }
+
+    // TODO: Добавить GlobalFilter для проверки сессии (JSESSIONID) для всех /api/** кроме /api/users/login и /api/users/register
+    // Фильтр должен делать внутренний запрос в accounts /api/users/session/validate с проксированной cookie
+    // Если 200 — пропускать, иначе — 401
 }

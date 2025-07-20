@@ -2,7 +2,6 @@ package com.kitchentech.accounts.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,17 +23,19 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/users/register").permitAll()
-                        .requestMatchers("/users/*").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/token-test/**").permitAll()  // Разрешить тестовые эндпоинты
-                        .anyRequest().authenticated()  // Требовать аутентификацию
+                        .requestMatchers("/users/register", "/users/login", "/login", "/actuator/**", "/token-test/**", "/users/session/validate", "/users/*").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
+                .formLogin(form -> form
+                        .loginProcessingUrl("/login")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/users/logout")
+                        .permitAll()
                 );
-
         return http.build();
     }
 } 

@@ -678,7 +678,9 @@
         async function updateAccountsUI() {
             try {
                 // Сначала получаем информацию о пользователе
-                const userInfoResponse = await fetch('/dashboard/user-info');
+                const userInfoResponse = await fetch('/dashboard/user-info', {
+                    credentials: 'include'
+                });
                 if (!userInfoResponse.ok) {
                     throw new Error('Не удалось получить информацию о пользователе');
                 }
@@ -692,7 +694,9 @@
                 console.log('👤 Username:', username);
                 
                 // Загружаем счета по userId
-                const response = await fetch(`/api/cash/accounts/user/${userId}`);
+                const response = await fetch(`/api/cash/accounts/user/${userId}`, {
+                    credentials: 'include'
+                });
                 if (response.ok) {
                     const accounts = await response.json();
                     userAccounts = accounts.map(account => ({
@@ -823,7 +827,8 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ newPassword })
+                body: JSON.stringify({ newPassword }),
+                credentials: 'include'
             })
                 .then(response => {
                     if (response.ok) {
@@ -878,7 +883,8 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(profileData)
+                body: JSON.stringify(profileData),
+                credentials: 'include'
             })
             .then(response => {
                 console.log('📥 Получен ответ:', response.status, response.statusText);
@@ -911,7 +917,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    }
+                    },
+                    credentials: 'include'
                 })
                 .then(response => response.text())
                 .then(result => {
@@ -954,7 +961,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(operationData)
+                    body: JSON.stringify(operationData),
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -998,7 +1006,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(operationData)
+                    body: JSON.stringify(operationData),
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -1056,7 +1065,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(transferData)
+                    body: JSON.stringify(transferData),
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -1098,7 +1108,9 @@
             }
 
             try {
-                const response = await fetch(`/api/cash/accounts/user/${userId}`);
+                const response = await fetch(`/api/cash/accounts/user/${userId}`, {
+                    credentials: 'include'
+                });
                 const accounts = await response.json();
 
                 const select = document.getElementById('recipientAccount');
@@ -1152,7 +1164,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(transferData)
+                    body: JSON.stringify(transferData),
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -1202,7 +1215,9 @@
 
             try {
                 // Получаем информацию о пользователе
-                const userInfoResponse = await fetch('/dashboard/user-info');
+                const userInfoResponse = await fetch('/dashboard/user-info', {
+                    credentials: 'include'
+                });
                 if (!userInfoResponse.ok) {
                     throw new Error('Не удалось получить информацию о пользователе');
                 }
@@ -1224,7 +1239,8 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(accountData)
+                    body: JSON.stringify(accountData),
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -1261,7 +1277,8 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(accountData)
+                        body: JSON.stringify(accountData),
+                        credentials: 'include'
                     });
 
                     if (response.ok) {
@@ -1292,7 +1309,8 @@
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        credentials: 'include'
                     });
 
                     if (response.ok) {
@@ -1311,7 +1329,9 @@
 
         async function loadUsersForTransfer() {
             try {
-                const response = await fetch('/dashboard/users');
+                const response = await fetch('/dashboard/users', {
+                    credentials: 'include'
+                });
                 if (!response.ok) throw new Error('Ошибка загрузки пользователей');
                 allUsers = await response.json();
                 const recipientUsernameSelect = document.getElementById('recipientUsername');

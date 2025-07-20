@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.servlet.http.HttpSession;
 
 @Slf4j
 @RestController
@@ -238,5 +239,13 @@ public class UserController {
                     log.warn("❌ [restore-user] Удаленный пользователь не найден: {}", username);
                     return ResponseEntity.status(404).body(Map.of("message", "Удаленный пользователь не найден"));
                 });
+    }
+
+    @GetMapping("/session/validate")
+    public ResponseEntity<?> validateSession(HttpSession session) {
+        if (session != null && session.getAttribute("SPRING_SECURITY_CONTEXT") != null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(401).build();
     }
 }
