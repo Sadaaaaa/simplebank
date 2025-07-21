@@ -1,24 +1,24 @@
 package com.kitchentech.accounts.controller;
 
-import com.kitchentech.accounts.dto.UserRegistrationDto;
-import com.kitchentech.accounts.dto.UserRegistrationResponseDto;
 import com.kitchentech.accounts.dto.ChangePasswordRequestDto;
 import com.kitchentech.accounts.dto.UserDetailsDto;
+import com.kitchentech.accounts.dto.UserRegistrationDto;
 import com.kitchentech.accounts.entity.User;
 import com.kitchentech.accounts.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import jakarta.servlet.http.HttpSession;
 
 @Slf4j
 @RestController
@@ -31,90 +31,7 @@ public class UserController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserRegistrationResponseDto> registerUser(@RequestBody UserRegistrationDto registrationDto) {
-        log.info("🔄 Получен запрос на регистрацию пользователя: {}", registrationDto.getUsername());
-        log.info("📧 Email: {}, Имя: {}, Фамилия: {}, Дата рождения: {}", registrationDto.getEmail(), registrationDto.getFirstName(), registrationDto.getLastName(), registrationDto.getBirthDate());
-
-        try {
-            // Проверяем, существует ли активный пользователь с таким username
-            if (userRepository.findByUsernameAndDeletedAtIsNull(registrationDto.getUsername()).isPresent()) {
-                log.warn("❌ Пользователь с username {} уже существует", registrationDto.getUsername());
-                UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
-                errorResponse.setUsername(registrationDto.getUsername());
-                errorResponse.setEmail(registrationDto.getEmail());
-                errorResponse.setFirstName(registrationDto.getFirstName());
-                errorResponse.setLastName(registrationDto.getLastName());
-                errorResponse.setMessage("Username already exists");
-                errorResponse.setSuccess(false);
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-
-            // Проверяем, существует ли активный пользователь с таким email
-            if (userRepository.findByEmailAndDeletedAtIsNull(registrationDto.getEmail()).isPresent()) {
-                log.warn("❌ Пользователь с email {} уже существует", registrationDto.getEmail());
-                UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
-                errorResponse.setUsername(registrationDto.getUsername());
-                errorResponse.setEmail(registrationDto.getEmail());
-                errorResponse.setFirstName(registrationDto.getFirstName());
-                errorResponse.setLastName(registrationDto.getLastName());
-                errorResponse.setMessage("Email already exists");
-                errorResponse.setSuccess(false);
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-
-            // Создаем нового пользователя
-            User user = new User();
-            user.setUsername(registrationDto.getUsername());
-            user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-            user.setEmail(registrationDto.getEmail());
-            user.setFirstName(registrationDto.getFirstName());
-            user.setLastName(registrationDto.getLastName());
-            user.setBirthDate(registrationDto.getBirthDate());
-            user.setRoles("USER");
-            user.setEnabled(true);
-
-            // Сохраняем пользователя
-            User savedUser = userRepository.save(user);
-            log.info("✅ Пользователь успешно зарегистрирован: {} (ID: {})", savedUser.getUsername(), savedUser.getId());
-
-            UserRegistrationResponseDto successResponse = new UserRegistrationResponseDto();
-            successResponse.setUsername(savedUser.getUsername());
-            successResponse.setEmail(savedUser.getEmail());
-            successResponse.setFirstName(savedUser.getFirstName());
-            successResponse.setLastName(savedUser.getLastName());
-            successResponse.setMessage("User registered successfully");
-            successResponse.setSuccess(true);
-
-            return ResponseEntity.ok(successResponse);
-
-        } catch (Exception e) {
-            log.error("❌ Ошибка при регистрации пользователя {}: {}", registrationDto.getUsername(), e.getMessage(), e);
-            UserRegistrationResponseDto errorResponse = new UserRegistrationResponseDto();
-            errorResponse.setUsername(registrationDto.getUsername());
-            errorResponse.setEmail(registrationDto.getEmail());
-            errorResponse.setFirstName(registrationDto.getFirstName());
-            errorResponse.setLastName(registrationDto.getLastName());
-            errorResponse.setMessage("Internal server error: " + e.getMessage());
-            errorResponse.setSuccess(false);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
-
-    @GetMapping("/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        log.info("🔍 Поиск активного пользователя по username: {}", username);
-
-        return userRepository.findByUsernameAndDeletedAtIsNull(username)
-                .map(user -> {
-                    log.info("✅ Пользователь найден: {}", username);
-                    return ResponseEntity.ok(user);
-                })
-                .orElseGet(() -> {
-                    log.warn("❌ Пользователь не найден: {}", username);
-                    return ResponseEntity.notFound().build();
-                });
-    }
+    // Удалены открытые методы, теперь только защищённые:
 
     @GetMapping
     public List<UserDetailsDto> getAllUsers() {
@@ -162,25 +79,19 @@ public class UserController {
         log.info("🔄 [update-profile] Обновление профиля для пользователя: {}", username);
         log.info("📧 [update-profile] Новые данные: firstName={}, lastName={}, email={}, birthDate={}", 
                 profileDto.getFirstName(), profileDto.getLastName(), profileDto.getEmail(), profileDto.getBirthDate());
-
         return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("🔍 [update-profile] Пользователь найден: {}", username);
-                    
-                    // Проверяем, не занят ли email другим активным пользователем
                     if (!user.getEmail().equals(profileDto.getEmail())) {
                         if (userRepository.findByEmailAndDeletedAtIsNull(profileDto.getEmail()).isPresent()) {
                             log.warn("❌ [update-profile] Email {} уже занят другим пользователем", profileDto.getEmail());
                             return ResponseEntity.badRequest().body(Map.of("message", "Email уже занят другим пользователем"));
                         }
                     }
-                    
-                    // Обновляем данные
                     user.setFirstName(profileDto.getFirstName());
                     user.setLastName(profileDto.getLastName());
                     user.setEmail(profileDto.getEmail());
                     user.setBirthDate(profileDto.getBirthDate());
-                    
                     userRepository.save(user);
                     log.info("✅ [update-profile] Профиль успешно обновлён для пользователя: {}", username);
                     return ResponseEntity.ok(Map.of("message", "Профиль успешно обновлён"));
@@ -195,19 +106,12 @@ public class UserController {
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username, 
                                                          @RequestParam(required = false) String deletedBy) {
         log.info("🔄 [delete-user] Soft delete пользователя: {} пользователем: {}", username, deletedBy);
-
         return userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .map(user -> {
                     log.info("🔍 [delete-user] Пользователь найден: {}", username);
-                    
-                    // Здесь можно добавить дополнительную логику проверки
-                    // Например, проверку баланса счетов, активных операций и т.д.
-                    
-                    // Soft delete - помечаем как удаленный
                     user.setEnabled(false);
                     user.setDeletedAt(LocalDateTime.now());
                     user.setDeletedBy(deletedBy != null ? deletedBy : "system");
-                    
                     userRepository.save(user);
                     log.info("✅ [delete-user] Пользователь помечен как удаленный (soft delete): {}", username);
                     return ResponseEntity.ok(Map.of("message", "Пользователь успешно удалён"));
@@ -241,10 +145,48 @@ public class UserController {
                 });
     }
 
-    @GetMapping("/session/validate")
-    public ResponseEntity<?> validateSession(HttpSession session) {
-        if (session != null && session.getAttribute("SPRING_SECURITY_CONTEXT") != null) {
-            return ResponseEntity.ok().build();
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+        log.info("🔍 Поиск активного пользователя по username: {}", username);
+        return userRepository.findByUsernameAndDeletedAtIsNull(username)
+                .map(user -> {
+                    log.info("✅ Пользователь найден: {}", username);
+                    return ResponseEntity.ok(user);
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ Пользователь не найден: {}", username);
+                    return ResponseEntity.notFound().build();
+                });
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailsDto> getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+
+            return userRepository.findByUsernameAndDeletedAtIsNull(auth.getName())
+                    .map(user -> {
+                        UserDetailsDto dto = new UserDetailsDto();
+                        dto.setId(user.getId());
+                        dto.setUsername(user.getUsername());
+                        dto.setPassword(user.getPassword());
+                        dto.setEnabled(user.getEnabled());
+                        dto.setCreatedAt(user.getCreatedAt());
+                        dto.setUpdatedAt(user.getUpdatedAt());
+                        dto.setDeletedAt(user.getDeletedAt());
+                        dto.setDeletedBy(user.getDeletedBy());
+                        dto.setEmail(user.getEmail());
+                        dto.setFirstName(user.getFirstName());
+                        dto.setLastName(user.getLastName());
+                        dto.setBirthDate(user.getBirthDate());
+                        if (user.getRoles() != null) {
+                            dto.setRoles(Arrays.asList(user.getRoles().split(",")));
+                        } else {
+                            dto.setRoles(Collections.emptyList());
+                        }
+                        return ResponseEntity.ok(dto);
+                    })
+                    .orElseGet(() -> ResponseEntity.status(404).build());
         }
         return ResponseEntity.status(401).build();
     }

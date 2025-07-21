@@ -1,16 +1,10 @@
 package com.kitchentech.gateway.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -22,16 +16,38 @@ public class RouteConfig {
         log.info("✅ Custom RouteLocator bean created");
         log.info("🔍 Создаем маршруты...");
         return builder.routes()
-                .route("front_ui_route", r -> r
-                        .path("/", "/login", "/register", "/register-success", "/dashboard", "/index")
+//                .route("front_ui_route", r -> r
+//                        .path("/", "/login", "/register", "/register-success", "/dashboard", "/index")
+//                        .filters(f -> f
+//                                .preserveHostHeader()
+//                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+//                                    log.info("🔄 Front-UI route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+//                                    return Mono.just(s != null ? s : "");
+//                                })
+//                        )
+//                        .uri("lb://front-ui"))
+                .route("public_route", r -> r
+                        .path("/api/public/login", "/api/public/register", "/api/public/{username}/restore", "/api/public/session/validate")
                         .filters(f -> f
                                 .preserveHostHeader()
+                                .stripPrefix(1)
                                 .modifyResponseBody(String.class, String.class, (exchange, s) -> {
-                                    log.info("🔄 Front-UI route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    log.info("🔄 Public route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
                                     return Mono.just(s != null ? s : "");
                                 })
                         )
-                        .uri("lb://front-ui"))
+                        .uri("lb://accounts"))
+                .route("login_route", r -> r
+                        .path("/api/login")
+                        .filters(f -> f
+                                .preserveHostHeader()
+                                .stripPrefix(1)
+                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+                                    log.info("🔄 Login route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    return Mono.just(s != null ? s : "");
+                                })
+                        )
+                        .uri("lb://accounts"))
                 .route("front_ui_api_route", r -> r
                         .path("/api/cash/**")
                         .filters(f -> f
@@ -72,12 +88,12 @@ public class RouteConfig {
                                     log.info("📤 Request headers: {}", exchange.getRequest().getHeaders());
                                     log.info("📥 Response status: {}", exchange.getResponse().getStatusCode());
                                     log.info("📄 Response body: {}", s);
-                                    
+
                                     if (s != null && s.contains("<!DOCTYPE html>")) {
                                         log.warn("⚠️ HTML response detected, converting to JSON error");
                                         return Mono.just("{\"error\":\"Not Found\"}");
                                     }
-                                    
+
                                     // Возвращаем пустую строку если тело ответа null
                                     return Mono.just(s != null ? s : "");
                                 })
@@ -109,6 +125,7 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://transfer"))
+
                 .route("exchange_route", r -> r
                         .path("/api/exchange/**")
                         .filters(f -> f
@@ -122,6 +139,7 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://exchange"))
+
                 .route("blocker_route", r -> r
                         .path("/api/blocker/**")
                         .filters(f -> f
@@ -148,6 +166,31 @@ public class RouteConfig {
                                 })
                         )
                         .uri("lb://notifications"))
+
+                .route("public_route", r -> r
+                        .path("/api/public/**")
+                        .filters(f -> f
+                                .addRequestHeader("Accept", "application/json")
+                                .addRequestHeader("Content-Type", "application/json")
+                                .addResponseHeader("Content-Type", "application/json")
+                                .stripPrefix(1)
+                                .preserveHostHeader()
+                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+                                    log.info("🔄 Users route: {} -> {} (Registration request)", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    log.info("📤 Request headers: {}", exchange.getRequest().getHeaders());
+                                    log.info("📥 Response status: {}", exchange.getResponse().getStatusCode());
+                                    log.info("📄 Response body: {}", s);
+
+                                    if (s != null && s.contains("<!DOCTYPE html>")) {
+                                        log.warn("⚠️ HTML response detected, converting to JSON error");
+                                        return Mono.just("{\"error\":\"Not Found\"}");
+                                    }
+
+                                    // Возвращаем пустую строку если тело ответа null
+                                    return Mono.just(s != null ? s : "");
+                                })
+                        )
+                        .uri("lb://accounts"))
                 .build();
     }
 }

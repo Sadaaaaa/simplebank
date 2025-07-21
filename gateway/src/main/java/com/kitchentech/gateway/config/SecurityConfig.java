@@ -1,44 +1,40 @@
 package com.kitchentech.gateway.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Slf4j
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private SessionValidationFilter sessionValidationFilter;
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        log.info("🔧 Настройка SecurityWebFilterChain для gateway");
-        
         http
+                .addFilterAt(sessionValidationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .authorizeExchange(exchanges -> {
-                    log.info("🔒 Настройка авторизации для gateway");
                     exchanges
-                            .pathMatchers("/", "/index", "/login", "/register", "/register-success", "/dashboard", "/login**").permitAll()
+                            .pathMatchers("/", "/index", "/login", "/register", "/register-success", "/dashboard", "/logout").permitAll()
                             .pathMatchers("/actuator/**").permitAll()
-                            .pathMatchers("/api/**").permitAll()
-                            .anyExchange().authenticated();
-                    log.info("✅ Авторизация настроена: /api/** разрешен без аутентификации");
+                            // Открытые API для логина/регистрации
+                            .pathMatchers("/api/public/**").permitAll()
+                            .pathMatchers("/api/login").permitAll()
+                            // Остальные API и страницы — только с сессией или JWT
+                            .anyExchange().permitAll();
                 })
-                .oauth2Login(Customizer.withDefaults())
-                .oauth2Client(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable());
-
-        log.info("✅ SecurityWebFilterChain настроен");
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(ServerHttpSecurity.CorsSpec::disable);
         return http.build();
     }
 
-    // TODO: Добавить GlobalFilter для проверки сессии (JSESSIONID) для всех /api/** кроме /api/users/login и /api/users/register
-    // Фильтр должен делать внутренний запрос в accounts /api/users/session/validate с проксированной cookie
-    // Если 200 — пропускать, иначе — 401
+
 }

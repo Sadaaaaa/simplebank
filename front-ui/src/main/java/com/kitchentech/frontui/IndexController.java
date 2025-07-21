@@ -28,7 +28,7 @@ import com.kitchentech.frontui.dto.UserDetailsDto;
 @Slf4j
 @RequestMapping("/")
 @Controller
-public class IndexPageController {
+public class IndexController {
 
     @Autowired
     private RestTemplate restTemplate;
@@ -96,7 +96,7 @@ public class IndexPageController {
             HttpEntity<UserRegistrationDto> entity = new HttpEntity<>(registrationDto, headers);
             
             // Вызываем API регистрации
-            String url = gatewayUrl + "/api/users/register";
+            String url = gatewayUrl + "/api/public/register";
             log.info("🌐 URL для регистрации: {}", url);
             
             ResponseEntity<UserRegistrationResponseDto> response = restTemplate.exchange(
@@ -140,38 +140,39 @@ public class IndexPageController {
     }
     
     @GetMapping("dashboard")
-    public String dashboard(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public String dashboard(HttpServletRequest request, Model model) {
         String username = "Гость";
-        
-        if (authentication != null && authentication.isAuthenticated() && 
-            !"anonymousUser".equals(authentication.getName())) {
-            username = authentication.getName();
-            
-            // Загружаем данные пользователя
-            try {
-                String url = gatewayUrl + "/api/users/" + username;
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<?> entity = new HttpEntity<>(headers);
-                
-                ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        UserDetailsDto.class
-                );
-                
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    UserDetailsDto userDetails = response.getBody();
-                    model.addAttribute("userDetails", userDetails);
-                    log.info("✅ Данные пользователя загружены: {}", username);
+        try {
+            // Прокидываем JSESSIONID из куки в запрос к /me
+            HttpHeaders headers = new HttpHeaders();
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("JSESSIONID".equals(cookie.getName())) {
+                        headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
+                    }
                 }
-            } catch (Exception e) {
-                log.warn("⚠️ Не удалось загрузить данные пользователя {}: {}", username, e.getMessage());
             }
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+
+            // Запрос к accounts через gateway
+            String url = gatewayUrl + "/api/users/me";
+            ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    UserDetailsDto.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                UserDetailsDto userDetails = response.getBody();
+                username = userDetails.getUsername();
+                model.addAttribute("userDetails", userDetails);
+                log.info("✅ Данные пользователя загружены через /me: {}", username);
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ Не удалось загрузить данные пользователя через /me: {}", e.getMessage());
         }
-        
+
         model.addAttribute("username", username);
         return "dashboard";
     }

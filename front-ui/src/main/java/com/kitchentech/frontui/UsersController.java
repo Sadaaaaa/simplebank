@@ -11,7 +11,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
-public class UsersProxyController {
+public class UsersController {
     private final RestTemplate restTemplate;
     @Value("${gateway.url}")
     private String gatewayUrl;

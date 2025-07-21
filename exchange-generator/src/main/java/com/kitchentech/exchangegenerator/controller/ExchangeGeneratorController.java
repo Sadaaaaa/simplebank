@@ -1,6 +1,5 @@
 package com.kitchentech.exchangegenerator.controller;
 
-import com.kitchentech.exchangegenerator.service.ExchangeRateGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
