@@ -1,5 +1,6 @@
 package com.kitchentech.frontui;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,16 @@ public class UsersController {
     private String gatewayUrl;
 
     @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         String url = gatewayUrl + "/api/users";
         HttpHeaders headers = new HttpHeaders();
+//        if (request.getCookies() != null) {
+//            for (var cookie : request.getCookies()) {
+//                if ("JSESSIONID".equals(cookie.getName())) {
+//                    headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
+//                }
+//            }
+//        }
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> entity = new HttpEntity<>(headers);
         try {

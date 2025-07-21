@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/register-success", "/error", "/css/**", "/dashboard", "/logout", "/").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
         return http.build();
     }
@@ -60,8 +60,9 @@ public class SecurityConfig {
 //    }
 //
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate restTemplate(SessionCookieInterceptor sessionCookieInterceptor) {
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setInterceptors(List.of(sessionCookieInterceptor));
 
         // Добавляем все необходимые конвертеры
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Collections;
 
@@ -14,7 +14,7 @@ import java.util.Collections;
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationsProxyController {
+public class NotificationsController {
     private final RestTemplate restTemplate;
     @Value("${gateway.url}")
     private String gatewayUrl;

@@ -504,7 +504,9 @@
         // Функции для работы с уведомлениями
         async function loadNotifications() {
             try {
-                const userInfoResponse = await fetch('/dashboard/user-info');
+                const userInfoResponse = await fetch('/dashboard/user-info', {
+                    credentials: 'include'
+                });
                 if (!userInfoResponse.ok) return;
                 
                 const userInfo = await userInfoResponse.json();
@@ -523,7 +525,9 @@
 
         async function showNotificationsModal() {
             try {
-                const userInfoResponse = await fetch('/dashboard/user-info');
+                const userInfoResponse = await fetch('/dashboard/user-info', {
+                    credentials: 'include'
+                });
                 if (!userInfoResponse.ok) return;
                 
                 const userInfo = await userInfoResponse.json();
@@ -600,7 +604,9 @@
 
         async function markAllAsRead() {
             try {
-                const userInfoResponse = await fetch('/dashboard/user-info');
+                const userInfoResponse = await fetch('/dashboard/user-info', {
+                    credentials: 'include'
+                });
                 if (!userInfoResponse.ok) return;
                 
                 const userInfo = await userInfoResponse.json();
@@ -763,7 +769,9 @@
         // Загрузка курсов валют
         async function loadCurrencyRates() {
             try {
-                const response = await fetch('/dashboard/exchange-rates');
+                const response = await fetch('/dashboard/exchange-rates', {
+                    credentials: 'include'
+                });
                 if (!response.ok) throw new Error('Ошибка загрузки курсов валют');
                 const rates = await response.json();
 
