@@ -1,4 +1,4 @@
-package com.kitchentech.frontui;
+package com.kitchentech.frontui.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;

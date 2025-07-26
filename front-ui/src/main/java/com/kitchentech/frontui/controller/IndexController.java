@@ -1,4 +1,4 @@
-package com.kitchentech.frontui;
+package com.kitchentech.frontui.controller;
 
 import com.kitchentech.frontui.dto.UserRegistrationDto;
 import com.kitchentech.frontui.dto.UserRegistrationResponseDto;

@@ -1,4 +1,4 @@
-package com.kitchentech.frontui;
+package com.kitchentech.frontui.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

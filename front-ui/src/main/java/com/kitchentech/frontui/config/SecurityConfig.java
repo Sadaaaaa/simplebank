@@ -30,35 +30,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Value("${gateway.url}")
-//    private String gatewayUrl;
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http, RestTemplate restTemplate) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/login", "/register", "/register-success", "/error", "/css/**", "/dashboard", "/logout").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/dashboard", true)
-//                        .permitAll()
-//                )
-//                .rememberMe(remember -> remember
-//                        .key("simplebank-remember-me-key")
-//                        .tokenValiditySeconds(60 * 60 * 24 * 30) // 30 дней
-//                        .rememberMeParameter("remember-me")
-//                        .userDetailsService(userDetailsService(restTemplate))
-//                )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/dashboard", true)
-//                );
-//        return http.build();
-//    }
-//
     @Bean
     public RestTemplate restTemplate(SessionCookieInterceptor sessionCookieInterceptor) {
         RestTemplate restTemplate = new RestTemplate();
@@ -80,54 +51,4 @@ public class SecurityConfig {
         restTemplate.setMessageConverters(messageConverters);
         return restTemplate;
     }
-//
-//    @Bean
-//    public UserDetailsService userDetailsService(RestTemplate restTemplate) {
-//        return username -> {
-//            log.info("🔍 Поиск пользователя: {}", username);
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//            HttpEntity<?> entity = new HttpEntity<>(headers);
-//            String url = gatewayUrl + "/api/public/" + username;
-//            log.info("📡 Запрос к: {}", url);
-//
-//            try {
-//                ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
-//                        url,
-//                        HttpMethod.GET,
-//                        entity,
-//                        UserDetailsDto.class
-//                );
-//
-//                log.info("✅ Получен ответ: статус={}, тело={}", response.getStatusCode(), response.getBody());
-//
-//                if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-//                    log.warn("❌ Неверный статус или пустое тело ответа");
-//                    throw new UsernameNotFoundException("User not found");
-//                }
-//
-//                UserDetailsDto user = response.getBody();
-//                log.info("👤 Пользователь найден: {}", user.getUsername());
-//
-//                return User.withUsername(user.getUsername())
-//                        .password(user.getPassword())
-//                        .roles(user.getRoles())
-//                        .build();
-//            } catch (HttpClientErrorException e) {
-//                log.error("❌ HTTP ошибка при поиске пользователя: статус={}, тело={}", e.getStatusCode(), e.getResponseBodyAsString());
-//                throw new UsernameNotFoundException("User not found", e);
-//            } catch (Exception e) {
-//                log.error("❌ Ошибка при поиске пользователя: {}", e.getMessage(), e);
-//                throw new UsernameNotFoundException("User not found", e);
-//            }
-//        };
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
 }

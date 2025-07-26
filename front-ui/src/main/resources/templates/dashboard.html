@@ -775,12 +775,11 @@
                 if (!response.ok) throw new Error('Ошибка загрузки курсов валют');
                 const rates = await response.json();
 
-                // RUB всегда 1 к 1
                 currencyRates = [
                     {
                         currency: 'USD',
-                        buy: formatRate(getRate(rates, 'USD', 'RUB')), // Покупка: сколько RUB за 1 USD
-                        sell: formatRate(1 / getRate(rates, 'RUB', 'USD')) // Продажа: сколько RUB за 1 USD (инверсия)
+                        buy: formatRate(getRate(rates, 'USD', 'RUB')),
+                        sell: formatRate(1 / getRate(rates, 'RUB', 'USD'))
                     },
                     {
                         currency: 'EUR',

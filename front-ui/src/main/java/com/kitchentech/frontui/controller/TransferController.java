@@ -1,4 +1,4 @@
-package com.kitchentech.frontui;
+package com.kitchentech.frontui.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
