@@ -134,7 +134,7 @@ public class RouteConfig {
                                 .addResponseHeader("Content-Type", "application/json")
                                 .preserveHostHeader()
                                 .modifyResponseBody(String.class, String.class, (exchange, s) -> {
-е                                       log.info("🔄 Transfer route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                       log.info("🔄 Transfer route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
                                     return Mono.just(s != null ? s : "");
                                 })
                         )

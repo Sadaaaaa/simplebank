@@ -25,14 +25,17 @@ public class SessionValidationFilter implements WebFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        
         // Пропускаем сервисные запросы с JWT
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return chain.filter(exchange);
         }
+        
         // Пропускаем открытые эндпоинты
         if (path.startsWith("/api/public/") || path.startsWith("/actuator/") || path.startsWith("/api/login")) {
             return chain.filter(exchange);
         }
+        
         // Проверяем JSESSIONID для остальных
         HttpCookie jsession = request.getCookies().getFirst("JSESSIONID");
         if (jsession == null) {
@@ -40,6 +43,7 @@ public class SessionValidationFilter implements WebFilter {
             exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
+        
         // Проверяем сессию через accounts
         String validateUrl = accountsUrl + "/public/session/validate";
         return webClient.get()
@@ -47,7 +51,15 @@ public class SessionValidationFilter implements WebFilter {
                 .cookie("JSESSIONID", jsession.getValue())
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
-                        return chain.filter(exchange);
+                        // Добавляем заголовок о том, что сессия валидна
+                        ServerHttpRequest mutatedRequest = request.mutate()
+                                .header("X-Gateway-Session-Valid", "true")
+                                .header("X-Gateway-Session-Id", jsession.getValue())
+                                .build();
+                        ServerWebExchange mutatedExchange = exchange.mutate()
+                                .request(mutatedRequest)
+                                .build();
+                        return chain.filter(mutatedExchange);
                     } else {
                         log.warn("Сессия невалидна для {}: {}", request.getPath(), response.statusCode());
                         exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
