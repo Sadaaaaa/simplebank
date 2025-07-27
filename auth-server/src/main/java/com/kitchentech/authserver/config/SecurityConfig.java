@@ -99,7 +99,23 @@ public class SecurityConfig {
                 .scope("write")
                 .build();
 
-        return new InMemoryRegisteredClientRepository(gatewayClient, exchangeGeneratorClient, exchangeClient, accountsClient);
+        RegisteredClient transferClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("transfer-client")
+                .clientSecret("{noop}transfer-secret")
+                .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
+
+        return new InMemoryRegisteredClientRepository(
+                gatewayClient,
+                exchangeGeneratorClient,
+                exchangeClient,
+                accountsClient,
+                transferClient);
     }
 
     @Bean

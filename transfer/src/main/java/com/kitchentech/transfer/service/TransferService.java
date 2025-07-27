@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +28,7 @@ public class TransferService {
 
     private final RestTemplate restTemplate;
     private final TransferHistoryRepository historyRepository;
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -306,6 +310,7 @@ public class TransferService {
             String url = gatewayUrl + "/api/cash/accounts/id/" + accountId;
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -346,6 +351,7 @@ public class TransferService {
             String withdrawUrl = gatewayUrl + "/api/cash/operation";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<Map<String, Object>> withdrawEntity = new HttpEntity<>(withdrawData, headers);
             ResponseEntity<Map> withdrawResponse = restTemplate.exchange(
                     withdrawUrl,
@@ -423,5 +429,22 @@ public class TransferService {
         } catch (Exception e) {
             log.error("❌ Не удалось отправить уведомление пользователю {}: {}", userId, e.getMessage(), e);
         }
+    }
+
+    private String getAccessToken() {
+        OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
+                .withClientRegistrationId("auth-server")
+                .principal("exchange-generator-service")
+                .build();
+
+        OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+
+        if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+            log.error("❌ Не удалось получить токен доступа");
+            return "";
+        }
+
+        log.info("[OAUTH2] Получен токен у auth-server: {}... ", authorizedClient.getAccessToken().getTokenValue());
+        return authorizedClient.getAccessToken().getTokenValue();
     }
 } 
