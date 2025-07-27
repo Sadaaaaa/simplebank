@@ -38,8 +38,8 @@ public class TransferService {
             String url = gatewayUrl + "/api/exchange/rates";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<?> entity = new HttpEntity<>(headers);
             headers.setBearerAuth(getAccessToken());
+            HttpEntity<?> entity = new HttpEntity<>(headers);
             ResponseEntity<List> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -176,8 +176,8 @@ public class TransferService {
                 );
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(blockReq, headers);
                 headers.setBearerAuth(getAccessToken());
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(blockReq, headers);
                 ResponseEntity<Map> blockResp = restTemplate.exchange(
                     gatewayUrl + "/api/blocker/check-transfer",
                     HttpMethod.POST,
@@ -437,7 +437,7 @@ public class TransferService {
     private String getAccessToken() {
         OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
                 .withClientRegistrationId("auth-server")
-                .principal("exchange-generator-service")
+                .principal("transfer-service")
                 .build();
 
         OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);

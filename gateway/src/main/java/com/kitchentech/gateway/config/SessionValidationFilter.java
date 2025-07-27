@@ -33,13 +33,12 @@ public class SessionValidationFilter implements WebFilter {
             log.info("✅ JWT запрос, пропускаем");
             return chain.filter(exchange);
         }
-        
+
         // Пропускаем открытые эндпоинты
         if (path.startsWith("/api/public/") || path.startsWith("/actuator/") || path.startsWith("/api/login") || 
             path.equals("/logout") || path.equals("/login") || path.equals("/register") || 
             path.equals("/register-success") || path.equals("/dashboard") || path.equals("/") || 
             path.equals("/index") || path.equals("/test")) {
-            log.info("✅ Публичный ресурс в gateway, пропускаем: {}", path);
             return chain.filter(exchange);
         }
         
