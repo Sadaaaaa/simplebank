@@ -140,7 +140,7 @@
                                     </span>
                                 </button>
                             </div>
-                            <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <form th:action="@{/logout}" method="post" style="display: inline;" id="logoutForm">
                                 <button type="submit" class="btn btn-link logout-link" style="text-decoration: none; padding: 0; border: none; background: none;">
                                     <i class="bi bi-box-arrow-right"></i> Выйти
                                 </button>
@@ -480,6 +480,16 @@
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 Страница dashboard загружена');
+            
+            // Добавляем обработчик для формы logout
+            const logoutForm = document.getElementById('logoutForm');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    console.log('🔄 Форма logout отправлена');
+                    console.log('📤 Action:', this.action);
+                    console.log('📤 Method:', this.method);
+                });
+            }
             
             // Проверяем, загружены ли данные пользователя
             const firstName = document.getElementById('firstName').value;

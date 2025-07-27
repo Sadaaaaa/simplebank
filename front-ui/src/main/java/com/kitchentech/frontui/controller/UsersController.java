@@ -1,5 +1,7 @@
 package com.kitchentech.frontui.controller;
 
+import com.kitchentech.frontui.helpers.SessionSetter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -20,11 +22,9 @@ public class UsersController {
     private String gatewayUrl;
 
     @GetMapping("/users")
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         String url = gatewayUrl + "/api/users";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         try {
             ResponseEntity<List> response = restTemplate.exchange(
                 url,

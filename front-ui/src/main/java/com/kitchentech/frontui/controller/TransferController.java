@@ -1,5 +1,7 @@
 package com.kitchentech.frontui.controller;
 
+import com.kitchentech.frontui.helpers.SessionSetter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,14 +24,12 @@ public class TransferController {
     private String gatewayUrl;
 
     @PostMapping("/internal")
-    public ResponseEntity<Map> performInternalTransfer(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Map> performInternalTransfer(@RequestBody Map<String, Object> request, HttpServletRequest httpServletRequest) {
         log.info("🔄 Проксирование запроса на внутренний перевод: {}", request);
         
         try {
             String url = gatewayUrl + "/api/transfer/internal";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, SessionSetter.createProxyHeaders(httpServletRequest));
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
@@ -49,14 +49,12 @@ public class TransferController {
     }
 
     @PostMapping("/external")
-    public ResponseEntity<Map> performExternalTransfer(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Map> performExternalTransfer(@RequestBody Map<String, Object> request, HttpServletRequest httpServletRequest) {
         log.info("🔄 Проксирование запроса на внешний перевод: {}", request);
         
         try {
             String url = gatewayUrl + "/api/transfer/external";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, SessionSetter.createProxyHeaders(httpServletRequest));
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
@@ -76,14 +74,12 @@ public class TransferController {
     }
 
     @GetMapping("/accounts/{username}")
-    public ResponseEntity<List<Map<String, Object>>> getUserAccounts(@PathVariable String username) {
+    public ResponseEntity<List<Map<String, Object>>> getUserAccounts(@PathVariable String username, HttpServletRequest request) {
         log.info("🔄 Проксирование запроса на получение счетов пользователя: {}", username);
         
         try {
             String url = gatewayUrl + "/api/transfer/accounts/" + username;
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<?> entity = new HttpEntity<>(headers);
+            HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
             ResponseEntity<Object[]> response = restTemplate.exchange(
                     url,

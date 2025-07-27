@@ -8,7 +8,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -20,20 +22,26 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SessionValidationFilter sessionValidationFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(sessionValidationFilter, AnonymousAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/register-success", "/error", "/css/**", "/dashboard", "/logout", "/").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/login", "/register", "/register-success", "/error", "/css/**", "/logout", "/").permitAll()
+                        .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendRedirect("/login")
+                        )
                 );
         return http.build();
     }
 
     @Bean
-    public RestTemplate restTemplate(SessionCookieInterceptor sessionCookieInterceptor) {
+    public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setInterceptors(List.of(sessionCookieInterceptor));
 
         // Добавляем все необходимые конвертеры
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();

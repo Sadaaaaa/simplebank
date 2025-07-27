@@ -1,5 +1,7 @@
 package com.kitchentech.frontui.controller;
 
+import com.kitchentech.frontui.helpers.SessionSetter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -27,14 +29,12 @@ public class CashController {
 
     @PostMapping("/operation")
     @ResponseBody
-    public ResponseEntity<Map> performOperation(@RequestBody Map<String, Object> operationData) {
+    public ResponseEntity<?> performOperation(@RequestBody Map<String, Object> operationData, HttpServletRequest request) {
         log.info("🔄 CashController: выполнение операции {}", operationData);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/operation";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(operationData, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(operationData, SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -53,15 +53,12 @@ public class CashController {
 
     @GetMapping("/accounts/{username}")
     @ResponseBody
-    public ResponseEntity<List<Map>> getUserAccounts(@PathVariable String username) {
+    public ResponseEntity<?> getUserAccounts(@PathVariable String username, HttpServletRequest request) {
         log.info("🔄 CashController: получение счетов для пользователя {}", username);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + username;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         try {
             ResponseEntity<Object[]> response = restTemplate.exchange(
                     url,
@@ -85,14 +82,12 @@ public class CashController {
 
     @GetMapping("/accounts/user/{userId}")
     @ResponseBody
-    public ResponseEntity<List<Map>> getUserAccountsById(@PathVariable Long userId) {
+    public ResponseEntity<?> getUserAccountsById(@PathVariable Long userId, HttpServletRequest request) {
         log.info("🔄 CashController: получение счетов для пользователя с ID {}", userId);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/user/" + userId;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Object[]> response = restTemplate.exchange(
@@ -117,14 +112,12 @@ public class CashController {
 
     @PostMapping("/accounts")
     @ResponseBody
-    public ResponseEntity<Map> createAccount(@RequestBody Map<String, Object> accountData) {
+    public ResponseEntity<?> createAccount(@RequestBody Map<String, Object> accountData, HttpServletRequest request) {
         log.info("🔄 CashController: создание нового счета {}", accountData);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -143,14 +136,12 @@ public class CashController {
 
     @PutMapping("/accounts/{accountId}")
     @ResponseBody
-    public ResponseEntity<Map> updateAccount(@PathVariable Long accountId, @RequestBody Map<String, Object> accountData) {
+    public ResponseEntity<?> updateAccount(@PathVariable Long accountId, @RequestBody Map<String, Object> accountData, HttpServletRequest request) {
         log.info("🔄 CashController: обновление счета с ID {}: {}", accountId, accountData);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + accountId;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -169,14 +160,12 @@ public class CashController {
 
     @DeleteMapping("/accounts/{accountId}")
     @ResponseBody
-    public ResponseEntity<Map> deleteAccount(@PathVariable Long accountId) {
+    public ResponseEntity<?> deleteAccount(@PathVariable Long accountId, HttpServletRequest request) {
         log.info("🔄 CashController: удаление счета с ID {}", accountId);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + accountId;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -191,12 +180,5 @@ public class CashController {
             log.error("❌ Ошибка при удалении счета через gateway: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Ошибка при удалении счета: " + e.getMessage()));
         }
-    }
-
-    @GetMapping("/health")
-    @ResponseBody
-    public ResponseEntity<String> health() {
-        log.info("🔄 CashController: проверка здоровья");
-        return ResponseEntity.ok("Cash controller is running");
     }
 } 

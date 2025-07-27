@@ -3,6 +3,8 @@ package com.kitchentech.accounts.config;
 import com.kitchentech.accounts.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -29,16 +33,35 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("http://localhost:8080/dashboard", true)
-                        .failureUrl("http://localhost:8080/login?error")
+                        .successHandler((request, response, authentication) -> {
+                            System.out.println("SUCCESS HANDLER CALLED!");
+                            try {
+                                response.setStatus(HttpStatus.OK.value());
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.getWriter().write("{\"success\":true,\"error\":null}");
+                                response.getWriter().flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            try {
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.getWriter().write("{\"success\":false,\"error\":\"" + exception.getMessage() + "\"}");
+                                response.getWriter().flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        })
                         .permitAll()
                 )
+
                 .logout(logout -> logout
                         .logoutUrl("/users/logout")
                         .permitAll()
                 );
+
         return http.build();
     }
 

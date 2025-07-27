@@ -1,5 +1,6 @@
 package com.kitchentech.frontui.controller;
 
+import com.kitchentech.frontui.helpers.SessionSetter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,7 @@ public class ExchangeController {
     @GetMapping("/exchange-rates")
     public ResponseEntity<?> getExchangeRates(HttpServletRequest request) {
         String url = gatewayUrl + "/api/exchange/rates";
-        HttpEntity<?> entity = new HttpEntity<>(createProxyHeaders(request));
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<List> response = restTemplate.exchange(
@@ -43,22 +44,5 @@ public class ExchangeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Ошибка при получении курсов валют: " + e.getMessage()));
         }
-    }
-
-    private HttpHeaders createProxyHeaders(HttpServletRequest request) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // Список заголовков для копирования
-        String[] headersToProxy = {"Cookie", "Authorization", "X-Forwarded-For", "X-Real-IP"};
-
-        for (String headerName : headersToProxy) {
-            String headerValue = request.getHeader(headerName);
-            if (headerValue != null) {
-                headers.add(headerName, headerValue);
-            }
-        }
-
-        return headers;
     }
 } 

@@ -16,7 +16,7 @@
             justify-content: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .login-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -28,7 +28,7 @@
             padding: 3rem;
             animation: fadeInUp 0.6s ease-out;
         }
-        
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -39,30 +39,30 @@
                 transform: translateY(0);
             }
         }
-        
+
         .login-header {
             text-align: center;
             margin-bottom: 2.5rem;
         }
-        
+
         .login-header .bank-icon {
             font-size: 3rem;
             color: #667eea;
             margin-bottom: 1rem;
         }
-        
+
         .login-header h1 {
             color: #333;
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        
+
         .login-header p {
             color: #666;
             font-size: 1.1rem;
         }
-        
+
         .form-control {
             border-radius: 10px;
             padding: 0.875rem 1rem;
@@ -70,24 +70,24 @@
             transition: all 0.3s ease;
             font-size: 1rem;
         }
-        
+
         .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
-        
+
         .input-group-text {
             background: transparent;
             border: 2px solid #e9ecef;
             border-right: none;
             border-radius: 10px 0 0 10px;
         }
-        
+
         .input-group .form-control {
             border-left: none;
             border-radius: 0 10px 10px 0;
         }
-        
+
         .btn-login {
             width: 100%;
             padding: 0.875rem;
@@ -100,28 +100,28 @@
             margin-top: 1.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
             background: linear-gradient(45deg, #5a6fd8, #6a4190);
         }
-        
+
         .form-check-input:checked {
             background-color: #667eea;
             border-color: #667eea;
         }
-        
+
         .form-check-input:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
-        
+
         .form-check-label {
             color: #555;
             font-weight: 500;
         }
-        
+
         .error-message {
             background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             color: white;
@@ -131,7 +131,7 @@
             text-align: center;
             font-weight: 500;
         }
-        
+
         .success-message {
             background: linear-gradient(45deg, #51cf66, #40c057);
             color: white;
@@ -141,32 +141,32 @@
             text-align: center;
             font-weight: 500;
         }
-        
+
         .remember-me-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 1rem 0;
         }
-        
+
         .forgot-password {
             color: #667eea;
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
         }
-        
+
         .forgot-password:hover {
             color: #5a6fd8;
             text-decoration: underline;
         }
-        
+
         .divider {
             text-align: center;
             margin: 2rem 0;
             position: relative;
         }
-        
+
         .divider::before {
             content: '';
             position: absolute;
@@ -176,7 +176,7 @@
             height: 1px;
             background: #e9ecef;
         }
-        
+
         .divider span {
             background: rgba(255, 255, 255, 0.95);
             padding: 0 1rem;
@@ -186,141 +186,147 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="bank-icon">
-                <i class="bi bi-bank2"></i>
-            </div>
-            <h1>SimpleBank</h1>
-            <p>Войдите в свою учетную запись</p>
+<div class="login-container">
+    <div class="login-header">
+        <div class="bank-icon">
+            <i class="bi bi-bank2"></i>
         </div>
+        <h1>SimpleBank</h1>
+        <p>Войдите в свою учетную запись</p>
+    </div>
 
-        <div th:if="${param.error}" class="error-message">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            Неверное имя пользователя или пароль
-        </div>
+    <div th:if="${param.error}" class="error-message">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Неверное имя пользователя или пароль
+    </div>
 
-        <div th:if="${param.logout}" class="success-message">
-            <i class="bi bi-check-circle me-2"></i>
-            Вы успешно вышли из системы
-        </div>
+    <div th:if="${param.logout}" class="success-message">
+        <i class="bi bi-check-circle me-2"></i>
+        Вы успешно вышли из системы
+    </div>
 
-        <form th:action="@{/login}" method="post">
-            <div class="mb-3">
-                <div class="input-group">
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+            <div class="input-group">
                     <span class="input-group-text">
                         <i class="bi bi-person"></i>
                     </span>
-                    <input type="text"
-                           class="form-control"
-                           id="username"
-                           name="username"
-                           placeholder="Имя пользователя"
-                           required
-                           autofocus>
-                </div>
+                <input type="text"
+                       class="form-control"
+                       id="username"
+                       name="username"
+                       placeholder="Имя пользователя"
+                       required
+                       autofocus>
             </div>
+        </div>
 
-            <div class="mb-3">
-                <div class="input-group">
+        <div class="mb-3">
+            <div class="input-group">
                     <span class="input-group-text">
                         <i class="bi bi-lock"></i>
                     </span>
-                    <input type="password"
-                           class="form-control"
-                           id="password"
-                           name="password"
-                           placeholder="Пароль"
-                           required>
-                </div>
+                <input type="password"
+                       class="form-control"
+                       id="password"
+                       name="password"
+                       placeholder="Пароль"
+                       required>
             </div>
-
-            <div class="remember-me-section">
-                <div class="form-check">
-                    <input type="checkbox"
-                           class="form-check-input"
-                           id="remember-me"
-                           name="remember-me">
-                    <label class="form-check-label" for="remember-me">
-                        <i class="bi bi-clock me-1"></i>
-                        Запомнить меня
-                    </label>
-                </div>
-                <a href="#" class="forgot-password">
-                    <i class="bi bi-question-circle me-1"></i>
-                    Забыли пароль?
-                </a>
-            </div>
-
-            <button type="submit" class="btn btn-login">
-                <i class="bi bi-box-arrow-in-right me-2"></i>
-                Войти в систему
-            </button>
-        </form>
-
-        <div class="divider">
-            <span>или</span>
         </div>
 
-        <div class="text-center">
-            <p class="text-muted mb-0">
-                <i class="bi bi-shield-check me-1"></i>
-                Ваши данные защищены
-            </p>
-            <p class="mt-3 mb-0">
-                Нет аккаунта? 
-                <a href="/register" class="text-decoration-none fw-bold" style="color: #667eea;">
-                    <i class="bi bi-person-plus me-1"></i>
-                    Зарегистрироваться
-                </a>
-            </p>
+        <div class="remember-me-section">
+            <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="remember-me"
+                       name="remember-me">
+                <label class="form-check-label" for="remember-me">
+                    <i class="bi bi-clock me-1"></i>
+                    Запомнить меня
+                </label>
+            </div>
+            <a href="#" class="forgot-password">
+                <i class="bi bi-question-circle me-1"></i>
+                Забыли пароль?
+            </a>
         </div>
+
+        <button type="submit" class="btn btn-login">
+            <i class="bi bi-box-arrow-in-right me-2"></i>
+            Войти в систему
+        </button>
+    </form>
+
+    <div class="text-center">
+        <p class="text-muted mb-0">
+            <i class="bi bi-shield-check me-1"></i>
+            Ваши данные защищены
+        </p>
+        <p class="mt-3 mb-0">
+            Нет аккаунта?
+            <a href="/register" class="text-decoration-none fw-bold" style="color: #667eea;">
+                <i class="bi bi-person-plus me-1"></i>
+                Зарегистрироваться
+            </a>
+        </p>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Добавляем анимацию при фокусе на поля
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Добавляем анимацию при фокусе на поля
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function () {
+            this.parentElement.style.transform = 'scale(1.02)';
         });
-        
-        // Автоматическое сохранение состояния чекбокса в localStorage
-        const rememberMeCheckbox = document.getElementById('remember-me');
-        const usernameInput = document.getElementById('username');
-        
-        // Восстанавливаем состояние при загрузке страницы
-        if (localStorage.getItem('rememberMe') === 'true') {
-            rememberMeCheckbox.checked = true;
-            const savedUsername = localStorage.getItem('savedUsername');
-            if (savedUsername) {
-                usernameInput.value = savedUsername;
-            }
+
+        input.addEventListener('blur', function () {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Автоматическое сохранение состояния чекбокса в localStorage
+    const rememberMeCheckbox = document.getElementById('remember-me');
+    const usernameInput = document.getElementById('username');
+
+    // Восстанавливаем состояние при загрузке страницы
+    if (localStorage.getItem('rememberMe') === 'true') {
+        rememberMeCheckbox.checked = true;
+        const savedUsername = localStorage.getItem('savedUsername');
+        if (savedUsername) {
+            usernameInput.value = savedUsername;
         }
-        
-        // Сохраняем состояние при изменении
-        rememberMeCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                localStorage.setItem('rememberMe', 'true');
-                localStorage.setItem('savedUsername', usernameInput.value);
-            } else {
-                localStorage.removeItem('rememberMe');
-                localStorage.removeItem('savedUsername');
-            }
-        });
-        
-        // Сохраняем имя пользователя при вводе
-        usernameInput.addEventListener('input', function() {
-            if (rememberMeCheckbox.checked) {
-                localStorage.setItem('savedUsername', this.value);
-            }
-        });
-    </script>
+    }
+
+    // Сохраняем состояние при изменении
+    rememberMeCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('savedUsername', usernameInput.value);
+        } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('savedUsername');
+        }
+    });
+
+    // Сохраняем имя пользователя при вводе
+    usernameInput.addEventListener('input', function () {
+        if (rememberMeCheckbox.checked) {
+            localStorage.setItem('savedUsername', this.value);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("logout was invoked");
+        fetch('/logout', {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(console.log('Logout called'))
+            .catch(error => console.error('Logout error:', error));
+    });
+</script>
 </body>
 </html>

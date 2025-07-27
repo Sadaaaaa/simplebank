@@ -16,16 +16,19 @@ public class RouteConfig {
         log.info("✅ Custom RouteLocator bean created");
         log.info("🔍 Создаем маршруты...");
         return builder.routes()
-//                .route("front_ui_route", r -> r
-//                        .path("/", "/login", "/register", "/register-success", "/dashboard", "/index")
-//                        .filters(f -> f
-//                                .preserveHostHeader()
-//                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
-//                                    log.info("🔄 Front-UI route: {} -> {}", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
-//                                    return Mono.just(s != null ? s : "");
-//                                })
-//                        )
-//                        .uri("lb://front-ui"))
+                .route("front_ui_route", r -> r
+                        .path("/", "/login", "/register", "/register-success", "/dashboard", "/index", "/logout", "/test")
+                        .filters(f -> f
+                                .preserveHostHeader()
+                                .modifyResponseBody(String.class, String.class, (exchange, s) -> {
+                                    log.info("🔄 Front-UI route: {} -> {} (Logout request)", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode());
+                                    log.info("📤 Request method: {}", exchange.getRequest().getMethod());
+                                    log.info("📤 Request headers: {}", exchange.getRequest().getHeaders());
+                                    log.info("📥 Response status: {}", exchange.getResponse().getStatusCode());
+                                    return Mono.just(s != null ? s : "");
+                                })
+                        )
+                        .uri("lb://front-ui"))
                 .route("public_route", r -> r
                         .path("/api/public/login", "/api/public/register", "/api/public/{username}/restore", "/api/public/session/validate")
                         .filters(f -> f

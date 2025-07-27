@@ -1,7 +1,9 @@
 package com.kitchentech.frontui.controller;
 
 import com.kitchentech.frontui.dto.ChangePasswordRequestDto;
+import com.kitchentech.frontui.dto.UserDetailsDto;
 import com.kitchentech.frontui.dto.UserRegistrationDto;
+import com.kitchentech.frontui.helpers.SessionSetter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +29,48 @@ public class DashboardController {
 
     public DashboardController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    @GetMapping
+    public String dashboard(HttpServletRequest request, Model model) {
+        log.info("🔄 DashboardController: отображение dashboard - ЗАПРОС ПОЛУЧЕН!");
+        log.info("🔍 Request URL: {}", request.getRequestURL());
+        log.info("🔍 Request method: {}", request.getMethod());
+        
+        String username = "Гость";
+        try {
+            // Прокидываем JSESSIONID из куки в запрос к /me
+            HttpHeaders headers = new HttpHeaders();
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("JSESSIONID".equals(cookie.getName())) {
+                        headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
+                    }
+                }
+            }
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+
+            // Запрос к accounts через gateway
+            String url = gatewayUrl + "/api/users/me";
+            ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    UserDetailsDto.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                UserDetailsDto userDetails = response.getBody();
+                username = userDetails.getUsername();
+                model.addAttribute("userDetails", userDetails);
+                log.info("✅ Данные пользователя загружены через /me: {}", username);
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ Не удалось загрузить данные пользователя через /me: {}", e.getMessage());
+        }
+
+        model.addAttribute("username", username);
+        return "dashboard";
     }
 
     @PostMapping("/change-password")
@@ -118,16 +163,14 @@ public class DashboardController {
 
     @GetMapping("/user-info")
     @ResponseBody
-    public ResponseEntity<Map> getUserInfo() {
+    public ResponseEntity<Map> getUserInfo(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: получение информации о пользователе {}", username);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/me";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(

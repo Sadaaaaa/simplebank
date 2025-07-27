@@ -1,14 +1,15 @@
 package com.kitchentech.frontui.controller;
 
+import com.kitchentech.frontui.helpers.SessionSetter;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
-import java.util.Collections;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -20,15 +21,11 @@ public class NotificationsController {
     private String gatewayUrl;
 
     @GetMapping("/notifications/unread")
-    public ResponseEntity<?> getUnreadNotifications(@RequestParam Long userId) {
+    public ResponseEntity<?> getUnreadNotifications(@RequestParam Long userId, HttpServletRequest request) {
         String url = gatewayUrl + "/api/notifications/unread?userId=" + userId;
         log.info("🔔 Запрос непрочитанных уведомлений для userId={}, URL={}", userId, url);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-        
+
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         try {
             ResponseEntity<Object> response = restTemplate.exchange(
                 url,
@@ -47,14 +44,11 @@ public class NotificationsController {
     }
 
     @GetMapping("/notifications/all")
-    public ResponseEntity<?> getAllNotifications(@RequestParam Long userId) {
+    public ResponseEntity<?> getAllNotifications(@RequestParam Long userId, HttpServletRequest request) {
         String url = gatewayUrl + "/api/notifications/all?userId=" + userId;
         log.info("🔔 Запрос всех уведомлений для userId={}, URL={}", userId, url);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         
         try {
             ResponseEntity<Object> response = restTemplate.exchange(
@@ -74,13 +68,11 @@ public class NotificationsController {
     }
 
     @PostMapping("/notifications/read/{id}")
-    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<?> markAsRead(@PathVariable Long id, HttpServletRequest request) {
         String url = gatewayUrl + "/api/notifications/read/" + id;
         log.info("🔔 Отметка уведомления как прочитанного: id={}, URL={}", id, url);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         
         try {
             ResponseEntity<Void> response = restTemplate.exchange(
@@ -99,13 +91,11 @@ public class NotificationsController {
     }
 
     @GetMapping("/notifications/unread-count")
-    public ResponseEntity<?> getUnreadCount(@RequestParam Long userId) {
+    public ResponseEntity<?> getUnreadCount(@RequestParam Long userId, HttpServletRequest request) {
         String url = gatewayUrl + "/api/notifications/unread-count?userId=" + userId;
         log.info("🔔 Запрос количества непрочитанных уведомлений для userId={}, URL={}", userId, url);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         
         try {
             ResponseEntity<Long> response = restTemplate.exchange(
