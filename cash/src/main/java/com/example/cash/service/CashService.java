@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +27,7 @@ public class CashService {
     
     private final AccountRepository accountRepository;
     private final RestTemplate restTemplate;
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
     
     @Value("${gateway.url:http://localhost:8081}")
     private String gatewayUrl;
@@ -97,11 +101,29 @@ public class CashService {
             String url = gatewayUrl + "/api/notifications/create";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notification, headers);
             restTemplate.postForEntity(url, entity, Void.class);
             log.info("✅ Уведомление отправлено пользователю {}: {}", userId, message);
         } catch (Exception e) {
             log.error("❌ Не удалось отправить уведомление пользователю {}: {}", userId, e.getMessage(), e);
         }
+    }
+
+    private String getAccessToken() {
+        OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
+                .withClientRegistrationId("auth-server")
+                .principal("cash-service")
+                .build();
+
+        OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);
+
+        if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+            log.error("❌ Не удалось получить токен доступа");
+            return "";
+        }
+
+        log.info("[OAUTH2] Получен токен у auth-server: {}... ", authorizedClient.getAccessToken().getTokenValue());
+        return authorizedClient.getAccessToken().getTokenValue();
     }
 } 

@@ -409,6 +409,7 @@ public class TransferService {
             String url = gatewayUrl + "/api/exchange/convert";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(fact, headers);
             restTemplate.postForEntity(url, entity, Void.class);
         } catch (Exception e) {
@@ -426,6 +427,7 @@ public class TransferService {
             String url = gatewayUrl + "/api/notifications/create";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(notification, headers);
             restTemplate.postForEntity(url, entity, Void.class);
             log.info("✅ Уведомление отправлено пользователю {}: {}", userId, message);

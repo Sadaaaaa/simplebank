@@ -121,13 +121,37 @@ public class SecurityConfig {
                 .scope("write")
                 .build();
 
+        RegisteredClient notificationsClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("notifications-client")
+                .clientSecret("{noop}notifications-secret")
+                .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
+
+        RegisteredClient cashClient = RegisteredClient
+                .withId(UUID.randomUUID().toString())
+                .clientId("cash-client")
+                .clientSecret("{noop}cash-secret")
+                .clientAuthenticationMethod(org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("read")
+                .scope("write")
+                .build();
+
         return new InMemoryRegisteredClientRepository(
                 gatewayClient,
                 exchangeGeneratorClient,
                 exchangeClient,
                 accountsClient,
                 transferClient,
-                blockerClient);
+                blockerClient,
+                notificationsClient,
+                cashClient);
     }
 
     @Bean
