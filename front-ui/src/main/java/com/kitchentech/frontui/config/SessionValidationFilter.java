@@ -1,5 +1,7 @@
 package com.kitchentech.frontui.config;
 
+import com.kitchentech.frontui.dto.UserDetailsDto;
+import com.kitchentech.frontui.helpers.SessionSetter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,13 +52,18 @@ public class SessionValidationFilter extends OncePerRequestFilter {
         
         // Проверяем сессию через accounts
         if (validateSession(request)) {
-            // Сессия валидна, устанавливаем аутентификацию
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    "authenticated-user", null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            log.info("✅ Сессия валидна, пропускаем запрос");
-            filterChain.doFilter(request, response);
+            UserDetailsDto userDetailsDto = getUserDetails(request);
+            if (userDetailsDto != null && userDetailsDto.getUsername() != null) {
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetailsDto.getUsername(), null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                log.info("✅ Сессия валидна, пропускаем запрос");
+                filterChain.doFilter(request, response);
+            } else {
+                log.warn("❌ Не удалось получить данные пользователя, перенаправляем на логин");
+                response.sendRedirect("/login");
+            }
         } else {
             // Сессия невалидна, перенаправляем на логин
             log.warn("❌ Сессия невалидна, перенаправляем на логин");
@@ -98,5 +105,24 @@ public class SessionValidationFilter extends OncePerRequestFilter {
             log.warn("Ошибка при проверке сессии: {}", e.getMessage());
             return false;
         }
+    }
+
+    private UserDetailsDto getUserDetails(HttpServletRequest request) {
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
+
+        try {
+            String url = gatewayUrl + "/api/users/me";
+            ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    UserDetailsDto.class
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("❌ Ошибка при получении информации о пользователе, {} ", e.getMessage());
+        }
+        return null;
     }
 }

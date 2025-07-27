@@ -69,18 +69,17 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.FOUND)
                         .header(HttpHeaders.LOCATION, "/dashboard")
                         .build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header(HttpHeaders.LOCATION, "/login?error")
+                        .build();
             }
 
-            // Если ошибка, возвращаем статус и сообщение об ошибке
-            String errorMessage = resp.getBody() != null && resp.getBody().getError() != null ? 
-                    resp.getBody().getError() : "Authentication failed";
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("{\"error\": \"" + errorMessage + "\"}");
         } catch (Exception e) {
-            System.out.println("❌ Login exception: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("{\"error\": \"Invalid credentials\"}");
+            System.out.println("❌ Login exception: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header(HttpHeaders.LOCATION, "/login?error")
+                    .build();
         }
     }
 

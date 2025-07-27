@@ -1,6 +1,7 @@
 package com.kitchentech.accounts.config;
 
 import com.kitchentech.accounts.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.io.IOException;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -34,7 +36,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .successHandler((request, response, authentication) -> {
-                            System.out.println("SUCCESS HANDLER CALLED!");
+                            log.info("SUCCESS HANDLER CALLED!");
                             try {
                                 response.setStatus(HttpStatus.OK.value());
                                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -45,6 +47,7 @@ public class SecurityConfig {
                             }
                         })
                         .failureHandler((request, response, exception) -> {
+                            log.info("FAILURE HANDLER CALLED! {}", exception.getMessage());
                             try {
                                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
