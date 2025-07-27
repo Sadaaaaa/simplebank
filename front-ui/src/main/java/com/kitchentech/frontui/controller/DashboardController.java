@@ -39,16 +39,17 @@ public class DashboardController {
         
         String username = "Гость";
         try {
-            // Прокидываем JSESSIONID из куки в запрос к /me
-            HttpHeaders headers = new HttpHeaders();
-            if (request.getCookies() != null) {
-                for (var cookie : request.getCookies()) {
-                    if ("JSESSIONID".equals(cookie.getName())) {
-                        headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
-                    }
-                }
-            }
-            HttpEntity<?> entity = new HttpEntity<>(headers);
+//            // Прокидываем JSESSIONID из куки в запрос к /me
+//            HttpHeaders headers = new HttpHeaders();
+//            if (request.getCookies() != null) {
+//                for (var cookie : request.getCookies()) {
+//                    if ("JSESSIONID".equals(cookie.getName())) {
+//                        headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
+//                    }
+//                }
+//            }
+//            HttpEntity<?> entity = new HttpEntity<>(headers);
+            HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
             // Запрос к accounts через gateway
             String url = gatewayUrl + "/api/users/me";
@@ -75,7 +76,7 @@ public class DashboardController {
 
     @PostMapping("/change-password")
     @ResponseBody
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequestDto request, HttpServletRequest servletRequest) {
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDto request, HttpServletRequest httpServletRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: смена пароля для пользователя {}", username);
@@ -83,9 +84,7 @@ public class DashboardController {
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/change-password";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ChangePasswordRequestDto> entity = new HttpEntity<>(request, headers);
+        HttpEntity<ChangePasswordRequestDto> entity = new HttpEntity<>(request, SessionSetter.createProxyHeaders(httpServletRequest));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -105,16 +104,14 @@ public class DashboardController {
 
     @PostMapping("/update-profile")
     @ResponseBody
-    public ResponseEntity<String> updateProfile(@RequestBody UserRegistrationDto profileDto, HttpServletRequest servletRequest) {
+    public ResponseEntity<?> updateProfile(@RequestBody UserRegistrationDto profileDto, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: обновление профиля для пользователя {}", username);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/" + username + "/profile";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<UserRegistrationDto> entity = new HttpEntity<>(profileDto, headers);
+        HttpEntity<UserRegistrationDto> entity = new HttpEntity<>(profileDto, SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -134,16 +131,14 @@ public class DashboardController {
 
     @PostMapping("/delete-account")
     @ResponseBody
-    public ResponseEntity<String> deleteAccount(HttpServletRequest servletRequest) {
+    public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: удаление аккаунта для пользователя {}", username);
 
         // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/" + username;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -163,7 +158,7 @@ public class DashboardController {
 
     @GetMapping("/user-info")
     @ResponseBody
-    public ResponseEntity<Map> getUserInfo(HttpServletRequest request) {
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: получение информации о пользователе {}", username);
