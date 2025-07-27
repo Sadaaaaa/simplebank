@@ -39,6 +39,7 @@ public class TransferService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<?> entity = new HttpEntity<>(headers);
+            headers.setBearerAuth(getAccessToken());
             ResponseEntity<List> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -176,6 +177,7 @@ public class TransferService {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 HttpEntity<Map<String, Object>> entity = new HttpEntity<>(blockReq, headers);
+                headers.setBearerAuth(getAccessToken());
                 ResponseEntity<Map> blockResp = restTemplate.exchange(
                     gatewayUrl + "/api/blocker/check-transfer",
                     HttpMethod.POST,
@@ -270,6 +272,7 @@ public class TransferService {
             String url = gatewayUrl + "/api/cash/accounts/" + username;
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAccessToken());
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
             ResponseEntity<Object[]> response = restTemplate.exchange(
