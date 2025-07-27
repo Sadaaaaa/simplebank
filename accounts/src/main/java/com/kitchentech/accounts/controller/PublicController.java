@@ -11,10 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.context.SecurityContext;
 
 import java.util.Map;
 
@@ -26,26 +26,6 @@ public class PublicController {
     private UserRepository userRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(
-//            @RequestParam String username,
-//            @RequestParam String password,
-//            HttpServletRequest request,
-//            HttpServletResponse response
-//    ) {
-//        try {
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(username, password)
-//            );
-//            // Устанавливаем аутентификацию в SecurityContext
-//            request.getSession(true); // создаём сессию, если нет
-//            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
-//            return ResponseEntity.ok().body(Map.of("message", "Login successful"));
-//        } catch (AuthenticationException e) {
-//            return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password"));
-//        }
-//    }
 
     @PostMapping("/register")
     public ResponseEntity<UserRegistrationResponseDto> registerUser(@RequestBody UserRegistrationDto registrationDto) {

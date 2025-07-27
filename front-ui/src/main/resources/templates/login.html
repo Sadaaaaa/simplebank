@@ -317,16 +317,6 @@
             localStorage.setItem('savedUsername', this.value);
         }
     });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log("logout was invoked");
-        fetch('/logout', {
-            method: 'GET',
-            credentials: 'include'
-        })
-            .then(console.log('Logout called'))
-            .catch(error => console.error('Logout error:', error));
-    });
 </script>
 </body>
 </html>

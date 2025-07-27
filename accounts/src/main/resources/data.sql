@@ -12,3 +12,5 @@ INSERT INTO users (
              2, 'user2', '$2a$12$.DHb5YQCuwroi2.8s/0yi.CsQMXWeVy/cgbjYzzm1l3WIatey.h6S', 'user2@example.com', 'Второй', 'Пользователь', 'USER', true, '1992-02-02', now(), now(), null, null
          ) ON CONFLICT (id) DO NOTHING;
 -- Пароль: password (bcrypt, твой рабочий хеш)
+
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
