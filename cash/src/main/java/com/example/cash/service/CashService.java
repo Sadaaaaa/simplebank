@@ -59,16 +59,14 @@ public class CashService {
                 account.setBalance(currentBalance.subtract(amount));
                 log.info("Снято {} с счета {}. Новый баланс: {}", amount, account.getId(), account.getBalance());
                 
-                // Отправляем уведомление о снятии
-                sendNotification(account.getUserId(), 
+                sendNotification(account.getUserId(),
                     String.format("Снято %.2f %s со счета %s", amount, account.getCurrency(), account.getName()));
                 
             } else if ("DEPOSIT".equals(operationDto.getOperationType())) {
                 account.setBalance(currentBalance.add(amount));
                 log.info("Внесено {} на счет {}. Новый баланс: {}", amount, account.getId(), account.getBalance());
                 
-                // Отправляем уведомление о пополнении
-                sendNotification(account.getUserId(), 
+                sendNotification(account.getUserId(),
                     String.format("Внесено %.2f %s на счет %s", amount, account.getCurrency(), account.getName()));
                 
             } else {

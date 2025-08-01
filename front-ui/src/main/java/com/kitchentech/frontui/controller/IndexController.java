@@ -59,7 +59,6 @@ public class IndexController {
 
         log.info("🔄 Начало регистрации пользователя: {}", username);
 
-        // Простая валидация
         if (!password.equals(confirmPassword)) {
             log.warn("❌ Пароли не совпадают для пользователя: {}", username);
             model.addAttribute("error", "Пароли не совпадают");
@@ -73,7 +72,6 @@ public class IndexController {
         }
 
         try {
-            // Создаем DTO для регистрации
             UserRegistrationDto registrationDto = new UserRegistrationDto();
             registrationDto.setUsername(username);
             registrationDto.setPassword(password);
@@ -84,13 +82,11 @@ public class IndexController {
 
             log.info("📤 Отправка данных регистрации: username={}, email={}, birthDate={}", username, email, birthDate);
 
-            // Настраиваем заголовки
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<UserRegistrationDto> entity = new HttpEntity<>(registrationDto, headers);
 
-            // Вызываем API регистрации
             String url = gatewayUrl + "/api/public/register";
             log.info("🌐 URL для регистрации: {}", url);
 
@@ -104,7 +100,6 @@ public class IndexController {
             log.info("📥 Получен ответ: статус={}, тело={}", response.getStatusCode(), response.getBody());
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                // Успешная регистрация
                 log.info("✅ Пользователь успешно зарегистрирован: {}", username);
                 return "redirect:/register-success";
             } else {
@@ -116,7 +111,6 @@ public class IndexController {
         } catch (Exception e) {
             log.error("❌ Ошибка при регистрации пользователя {}: {}", username, e.getMessage(), e);
 
-            // Обрабатываем ошибки
             String errorMessage = "Ошибка при регистрации";
             if (e.getMessage().contains("Username already exists")) {
                 errorMessage = "Пользователь с таким именем уже существует";
@@ -137,7 +131,6 @@ public class IndexController {
         log.info("📤 Request URL: {}", request.getRequestURL());
 
         try {
-            // Копируем куки сессии
             HttpHeaders headers = new HttpHeaders();
             if (request.getCookies() != null) {
                 for (var cookie : request.getCookies()) {
@@ -150,12 +143,10 @@ public class IndexController {
 
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
-            // Отправляем logout запрос в accounts
             String url = gatewayUrl + "/api/users/logout";
             log.info("🌐 Отправляем logout запрос на: {}", url);
             restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
 
-            // Очищаем куки в браузере
             Cookie sessionCookie = new Cookie("JSESSIONID", "");
             sessionCookie.setMaxAge(0);
             sessionCookie.setPath("/");

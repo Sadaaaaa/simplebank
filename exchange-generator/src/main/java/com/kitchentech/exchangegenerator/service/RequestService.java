@@ -37,10 +37,8 @@ public class RequestService {
         log.info("🔄 Генерация курсов валют...");
 
         try {
-            // Генерируем курсы для всех пар валют
             List<ExchangeRateDto> rates = generatorService.generateExchangeRates();
 
-            // Отправляем в exchange сервис через gateway
             sendRatesToExchangeService(rates);
 
             log.info("✅ Курсы валют сгенерированы и отправлены");
@@ -54,7 +52,7 @@ public class RequestService {
         try {
             OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest
                     .withClientRegistrationId("auth-server")
-                    .principal("exchange-generator-service") // любой уникальный идентификатор
+                    .principal("exchange-generator-service")
                     .build();
 
             OAuth2AuthorizedClient authorizedClient = authorizedClientManager.authorize(authorizeRequest);

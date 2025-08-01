@@ -21,7 +21,6 @@ public class GeneratorService {
     private static final List<String> CURRENCIES = Arrays.asList("RUB", "USD", "EUR");
     private static final String BASE_CURRENCY = "RUB";
     
-    // Базовые курсы (примерные)
     private static final Map<String, BigDecimal> BASE_RATES = Map.of(
         "USD", new BigDecimal("0.011"), // 1 RUB = 0.011 USD
         "EUR", new BigDecimal("0.010")  // 1 RUB = 0.010 EUR
@@ -29,14 +28,12 @@ public class GeneratorService {
 
     private BigDecimal generateRate(String fromCurrency, String toCurrency) {
 
-        // Если одна из валют - базовая (RUB), используем прямой курс
         if (fromCurrency.equals(BASE_CURRENCY)) {
             return getBaseRate(toCurrency);
         } else if (toCurrency.equals(BASE_CURRENCY)) {
             return BigDecimal.ONE.divide(getBaseRate(fromCurrency), 4, RoundingMode.HALF_UP);
         } else {
 
-            // Для конвертации между небазовыми валютами: через RUB
             BigDecimal fromToRub = BigDecimal.ONE.divide(getBaseRate(fromCurrency), 4, RoundingMode.HALF_UP);
             BigDecimal rubToTo = getBaseRate(toCurrency);
             return fromToRub.multiply(rubToTo).setScale(4, RoundingMode.HALF_UP);
@@ -47,7 +44,6 @@ public class GeneratorService {
         List<ExchangeRateDto> rates = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         
-        // Генерируем курсы для всех пар валют
         for (String fromCurrency : CURRENCIES) {
             for (String toCurrency : CURRENCIES) {
                 if (!fromCurrency.equals(toCurrency)) {
@@ -73,7 +69,6 @@ public class GeneratorService {
             return BigDecimal.ONE;
         }
         
-        // Добавляем случайное изменение ±5%
         double randomChange = 0.95 + (Math.random() * 0.1); // 0.95 - 1.05
         return baseRate.multiply(BigDecimal.valueOf(randomChange)).setScale(4, RoundingMode.HALF_UP);
     }

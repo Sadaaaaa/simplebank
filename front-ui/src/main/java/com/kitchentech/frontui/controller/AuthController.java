@@ -1,7 +1,6 @@
 package com.kitchentech.frontui.controller;
 
 import com.kitchentech.frontui.dto.LoginResponseDto;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response) {
-        // Копируем параметры формы
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
@@ -38,7 +36,6 @@ public class AuthController {
 
         try {
             System.out.println("🔄 Отправляем логин запрос на: " + gatewayUrl + "/api/login");
-            // Проксируем на accounts через gateway
             ResponseEntity<LoginResponseDto> resp = restTemplate.exchange(
                     gatewayUrl + "/api/login",
                     HttpMethod.POST,
@@ -50,7 +47,6 @@ public class AuthController {
                              ", body=" + (resp.getBody() != null) + 
                              ", success=" + (resp.getBody() != null ? resp.getBody().isSuccess() : "null"));
 
-            // Копируем Set-Cookie из ответа accounts в ответ клиенту
             List<String> cookies = resp.getHeaders().get(HttpHeaders.SET_COOKIE);
             if (cookies != null) {
                 for (String cookie : cookies) {
@@ -58,10 +54,8 @@ public class AuthController {
                 }
             }
 
-            // Если логин успешный, делаем редирект на dashboard
             if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null && resp.getBody().isSuccess()) {
                 System.out.println("🔄 Выполняем редирект на /dashboard");
-                // Возвращаем простой редирект без JSON
                 return ResponseEntity.status(HttpStatus.FOUND)
                         .header(HttpHeaders.LOCATION, "/dashboard")
                         .build();

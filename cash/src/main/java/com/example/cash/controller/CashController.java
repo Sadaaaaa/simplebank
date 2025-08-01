@@ -91,7 +91,6 @@ public class CashController {
         log.info("Создание нового счета: {}", accountDto);
         
         try {
-            // Проверяем, есть ли уже счет в этой валюте у пользователя
             List<Account> existingAccounts = accountRepository.findByUserIdAndDeletedAtIsNull(accountDto.getUserId());
             boolean hasCurrencyAccount = existingAccounts.stream()
                     .anyMatch(acc -> acc.getCurrency().equals(accountDto.getCurrency()));
@@ -153,13 +152,11 @@ public class CashController {
             Account account = accountRepository.findByIdAndDeletedAtIsNull(accountId)
                     .orElseThrow(() -> new RuntimeException("Счет не найден"));
             
-            // Проверяем, что баланс равен нулю
             if (account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
                 log.warn("Невозможно удалить счет с ненулевым балансом: {}", account.getBalance());
                 return ResponseEntity.badRequest().build();
             }
             
-            // Soft delete - помечаем как удаленный
             account.setActive(false);
             account.setDeletedAt(LocalDateTime.now());
             account.setDeletedBy(deletedBy != null ? deletedBy : "system");

@@ -24,10 +24,8 @@ public class SecurityConfig {
                     exchanges
                             .pathMatchers("/", "/index", "/login", "/register", "/register-success", "/dashboard", "/logout").permitAll()
                             .pathMatchers("/actuator/**").permitAll()
-                            // Открытые API для логина/регистрации
                             .pathMatchers("/api/public/**").permitAll()
                             .pathMatchers("/api/login").permitAll()
-                            // Остальные API и страницы — только с сессией или JWT
                             .anyExchange().permitAll();
                 })
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

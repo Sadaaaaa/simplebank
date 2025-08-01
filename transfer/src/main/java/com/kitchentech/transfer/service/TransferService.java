@@ -88,7 +88,7 @@ public class TransferService {
             }
             BigDecimal amountToWithdraw = request.getAmount();
             BigDecimal amountToDeposit = amountToWithdraw;
-            // Если валюты разные — пересчитываем сумму
+
             if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
                 BigDecimal rate = getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency());
                 amountToDeposit = amountToWithdraw.multiply(rate);
@@ -115,10 +115,9 @@ public class TransferService {
                     amountToWithdraw,
                     amountToDeposit,
                     (!fromAccount.getCurrency().equals(toAccount.getCurrency()) ? getExchangeRate(fromAccount.getCurrency(), toAccount.getCurrency()) : BigDecimal.ONE),
-                    true // internal
+                    true
                 );
-                
-                // Отправляем уведомления для внутреннего перевода
+
                 String fromMessage = String.format("Переведено %.2f %s со счета %s на счет %s", 
                     amountToWithdraw, fromAccount.getCurrency(), fromAccount.getName(), toAccount.getName());
                 String toMessage = String.format("Получено %.2f %s на счет %s со счета %s", 

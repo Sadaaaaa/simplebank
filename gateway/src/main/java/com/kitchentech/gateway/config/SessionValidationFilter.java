@@ -28,14 +28,12 @@ public class SessionValidationFilter implements WebFilter {
         
         log.info("🔍 Gateway SessionValidationFilter: {} {}", request.getMethod(), path);
         
-        // Пропускаем сервисные запросы с JWT
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             log.info("✅ JWT запрос, пропускаем");
             return chain.filter(exchange);
         }
 
-        // Пропускаем открытые эндпоинты
-        if (path.startsWith("/api/public/") || path.startsWith("/actuator/") || path.startsWith("/api/login") || 
+        if (path.startsWith("/api/public/") || path.startsWith("/actuator/") || path.startsWith("/api/login") ||
             path.equals("/logout") || path.equals("/login") || path.equals("/register") || 
             path.equals("/register-success") || path.equals("/dashboard") || path.equals("/") || 
             path.equals("/index") || path.equals("/test")) {
@@ -44,7 +42,6 @@ public class SessionValidationFilter implements WebFilter {
         
         log.info("🔐 Проверяем JSESSIONID для: {}", path);
         
-        // Проверяем JSESSIONID для остальных
         HttpCookie jsession = request.getCookies().getFirst("JSESSIONID");
         if (jsession == null) {
             log.warn("❌ Нет JSESSIONID, доступ запрещён: {}", request.getPath());
@@ -54,7 +51,6 @@ public class SessionValidationFilter implements WebFilter {
         
         log.info("🍪 Найден JSESSIONID: {}", jsession.getValue());
         
-        // Проверяем сессию через accounts
         String validateUrl = accountsUrl + "/public/session/validate";
         return webClient.get()
                 .uri(validateUrl)
@@ -62,7 +58,6 @@ public class SessionValidationFilter implements WebFilter {
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
                         log.info("✅ Сессия валидна в gateway, пропускаем");
-                        // Добавляем заголовок о том, что сессия валидна
                         ServerHttpRequest mutatedRequest = request.mutate()
                                 .header("X-Gateway-Session-Valid", "true")
                                 .header("X-Gateway-Session-Id", jsession.getValue())

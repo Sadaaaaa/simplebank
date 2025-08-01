@@ -39,19 +39,8 @@ public class DashboardController {
         
         String username = "Гость";
         try {
-//            // Прокидываем JSESSIONID из куки в запрос к /me
-//            HttpHeaders headers = new HttpHeaders();
-//            if (request.getCookies() != null) {
-//                for (var cookie : request.getCookies()) {
-//                    if ("JSESSIONID".equals(cookie.getName())) {
-//                        headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
-//                    }
-//                }
-//            }
-//            HttpEntity<?> entity = new HttpEntity<>(headers);
             HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
-            // Запрос к accounts через gateway
             String url = gatewayUrl + "/api/users/me";
             ResponseEntity<UserDetailsDto> response = restTemplate.exchange(
                     url,
@@ -82,7 +71,6 @@ public class DashboardController {
         log.info("🔄 DashboardController: смена пароля для пользователя {}", username);
         request.setUsername(username);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/change-password";
         HttpEntity<ChangePasswordRequestDto> entity = new HttpEntity<>(request, SessionSetter.createProxyHeaders(httpServletRequest));
 
@@ -109,7 +97,6 @@ public class DashboardController {
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: обновление профиля для пользователя {}", username);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/" + username + "/profile";
         HttpEntity<UserRegistrationDto> entity = new HttpEntity<>(profileDto, SessionSetter.createProxyHeaders(request));
 
@@ -136,7 +123,6 @@ public class DashboardController {
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: удаление аккаунта для пользователя {}", username);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/" + username;
         HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
@@ -163,7 +149,6 @@ public class DashboardController {
         String username = authentication != null ? authentication.getName() : null;
         log.info("🔄 DashboardController: получение информации о пользователе {}", username);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/users/me";
         HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 

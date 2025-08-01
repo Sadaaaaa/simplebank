@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 public class CashOperationDto {
     private Long accountId;
     private BigDecimal amount;
-    private String operationType; // "DEPOSIT" или "WITHDRAW"
+    private String operationType;
 } 

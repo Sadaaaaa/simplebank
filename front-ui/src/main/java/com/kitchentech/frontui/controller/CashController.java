@@ -32,7 +32,6 @@ public class CashController {
     public ResponseEntity<?> performOperation(@RequestBody Map<String, Object> operationData, HttpServletRequest request) {
         log.info("🔄 CashController: выполнение операции {}", operationData);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/operation";
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(operationData, SessionSetter.createProxyHeaders(request));
 
@@ -56,7 +55,6 @@ public class CashController {
     public ResponseEntity<?> getUserAccounts(@PathVariable String username, HttpServletRequest request) {
         log.info("🔄 CashController: получение счетов для пользователя {}", username);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + username;
         HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
         try {
@@ -68,7 +66,6 @@ public class CashController {
             );
             log.info("✅ Ответ от gateway для получения счетов: {}", response.getStatusCode());
             
-            // Преобразуем Object[] в List<Map>
             List<Map> accounts = java.util.Arrays.stream(response.getBody())
                     .map(item -> (Map) item)
                     .collect(Collectors.toList());
@@ -85,7 +82,6 @@ public class CashController {
     public ResponseEntity<?> getUserAccountsById(@PathVariable Long userId, HttpServletRequest request) {
         log.info("🔄 CashController: получение счетов для пользователя с ID {}", userId);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/user/" + userId;
         HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 
@@ -98,7 +94,6 @@ public class CashController {
             );
             log.info("✅ Ответ от gateway для получения счетов по userId: {}", response.getStatusCode());
             
-            // Преобразуем Object[] в List<Map>
             List<Map> accounts = java.util.Arrays.stream(response.getBody())
                     .map(item -> (Map) item)
                     .collect(Collectors.toList());
@@ -115,7 +110,6 @@ public class CashController {
     public ResponseEntity<?> createAccount(@RequestBody Map<String, Object> accountData, HttpServletRequest request) {
         log.info("🔄 CashController: создание нового счета {}", accountData);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts";
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, SessionSetter.createProxyHeaders(request));
 
@@ -139,7 +133,6 @@ public class CashController {
     public ResponseEntity<?> updateAccount(@PathVariable Long accountId, @RequestBody Map<String, Object> accountData, HttpServletRequest request) {
         log.info("🔄 CashController: обновление счета с ID {}: {}", accountId, accountData);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + accountId;
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(accountData, SessionSetter.createProxyHeaders(request));
 
@@ -163,7 +156,6 @@ public class CashController {
     public ResponseEntity<?> deleteAccount(@PathVariable Long accountId, HttpServletRequest request) {
         log.info("🔄 CashController: удаление счета с ID {}", accountId);
 
-        // Формируем запрос к gateway
         String url = gatewayUrl + "/api/cash/accounts/" + accountId;
         HttpEntity<?> entity = new HttpEntity<>(SessionSetter.createProxyHeaders(request));
 

@@ -20,7 +20,6 @@ public class OAuth2ClientConfig {
                 new AuthorizedClientServiceOAuth2AuthorizedClientManager(
                         clientRegistrationRepository, authorizedClientService);
 
-        // Включаем client_credentials
         authorizedClientManager.setAuthorizedClientProvider(
                 org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder.builder()
                         .clientCredentials()

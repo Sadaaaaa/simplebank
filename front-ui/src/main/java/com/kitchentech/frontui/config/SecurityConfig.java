@@ -43,10 +43,8 @@ public class SecurityConfig {
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
 
-        // Добавляем все необходимые конвертеры
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
-        // Используем стандартный Jackson конвертер только для JSON
         MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
 
         messageConverters.add(jacksonConverter);

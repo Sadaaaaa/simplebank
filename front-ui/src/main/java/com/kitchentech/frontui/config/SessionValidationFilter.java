@@ -41,7 +41,6 @@ public class SessionValidationFilter extends OncePerRequestFilter {
 
         log.info("🔍 SessionValidationFilter получил запрос: {} {}", request.getMethod(), request.getRequestURI());
 
-        // Пропускаем публичные ресурсы
         if (isPublicResource(request.getRequestURI())) {
             log.info("✅ Публичный ресурс, пропускаем: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
@@ -50,7 +49,6 @@ public class SessionValidationFilter extends OncePerRequestFilter {
 
         log.info("🔐 Проверяем сессию для: {}", request.getRequestURI());
         
-        // Проверяем сессию через accounts
         if (validateSession(request)) {
             UserDetailsDto userDetailsDto = getUserDetails(request);
             if (userDetailsDto != null && userDetailsDto.getUsername() != null) {
@@ -65,7 +63,6 @@ public class SessionValidationFilter extends OncePerRequestFilter {
                 response.sendRedirect("/login");
             }
         } else {
-            // Сессия невалидна, перенаправляем на логин
             log.warn("❌ Сессия невалидна, перенаправляем на логин");
             response.sendRedirect("/login");
         }
@@ -83,7 +80,6 @@ public class SessionValidationFilter extends OncePerRequestFilter {
 
     private boolean validateSession(HttpServletRequest request) {
         try {
-            // Копируем куки сессии
             HttpHeaders headers = new HttpHeaders();
             if (request.getCookies() != null) {
                 for (var cookie : request.getCookies()) {
@@ -95,7 +91,6 @@ public class SessionValidationFilter extends OncePerRequestFilter {
 
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
-            // Проверяем сессию через accounts
             String url = gatewayUrl + "/api/public/session/validate";
             ResponseEntity<Void> response = restTemplate.exchange(
                     url, HttpMethod.GET, entity, Void.class);

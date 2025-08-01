@@ -66,13 +66,11 @@ public class SecurityConfig {
                                         FilterChain filterChain) throws ServletException, IOException {
 
 
-            // Если уже есть аутентификация (например, JWT), пропускаем
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // Проверяем заголовки от Gateway
             String gatewaySessionValid = request.getHeader("X-Gateway-Session-Valid");
             String gatewaySessionId = request.getHeader("X-Gateway-Session-Id");
 
@@ -80,7 +78,6 @@ public class SecurityConfig {
                     gatewaySessionValid, gatewaySessionId);
 
             if ("true".equals(gatewaySessionValid) && gatewaySessionId != null) {
-                // Создаем аутентификацию для валидной сессии
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 "gateway-session-" + gatewaySessionId,

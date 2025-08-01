@@ -13,15 +13,6 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public void sendNotification(Long userId, String message) {
-        Notification notification = new Notification();
-        notification.setUserId(userId);
-        notification.setMessage(message);
-        notification.setCreatedAt(LocalDateTime.now());
-        notification.setRead(false);
-        notificationRepository.save(notification);
-    }
-
     public List<Notification> getUnreadNotifications(Long userId) {
         return notificationRepository.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId);
     }
