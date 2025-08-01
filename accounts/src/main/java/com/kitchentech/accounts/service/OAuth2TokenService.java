@@ -56,7 +56,6 @@ public class OAuth2TokenService {
         log.info("🔍 [OAuth2TokenService] Проверка токена: {}", 
                 token.substring(0, Math.min(20, token.length())) + "...");
         
-        // Здесь можно добавить дополнительную валидацию токена
         return true;
     }
 } 

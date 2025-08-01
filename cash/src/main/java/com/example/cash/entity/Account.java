@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", schema = "cash_schema")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class Account {

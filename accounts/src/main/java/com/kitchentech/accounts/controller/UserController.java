@@ -31,8 +31,6 @@ public class UserController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    // Удалены открытые методы, теперь только защищённые:
-
     @GetMapping
     public List<UserDetailsDto> getAllUsers() {
         return userRepository.findAllByDeletedAtIsNull()
@@ -41,9 +39,6 @@ public class UserController {
                     UserDetailsDto dto = new UserDetailsDto();
                     dto.setId(user.getId());
                     dto.setUsername(user.getUsername());
-//                    dto.setEmail(user.getEmail());
-//                    dto.setFirstName(user.getFirstName());
-//                    dto.setLastName(user.getLastName());
                     dto.setRoles(user.getRoles() != null ? List.of(user.getRoles().split(",")) : List.of());
                     return dto;
                 })
@@ -130,7 +125,6 @@ public class UserController {
                 .map(user -> {
                     log.info("🔍 [restore-user] Удаленный пользователь найден: {}", username);
                     
-                    // Восстанавливаем пользователя
                     user.setEnabled(true);
                     user.setDeletedAt(null);
                     user.setDeletedBy(null);

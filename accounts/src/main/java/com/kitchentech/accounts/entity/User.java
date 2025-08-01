@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "accounts_schema")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class User {

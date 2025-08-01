@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transfer_history")
+@Table(name = "transfer_history", schema = "transfer_schema")
 @Data
 public class TransferHistory {
     @Id
