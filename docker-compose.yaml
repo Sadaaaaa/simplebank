@@ -13,6 +13,7 @@ services:
     user: "0:0"
     command: >
       sh -c "
+      apk add --no-cache curl &&
       consul agent -dev -client=0.0.0.0 -ui &
       sleep 15 &&
       BACKUP_FILE=$$(ls -t /consul/backups/*.snap 2>/dev/null | head -n1) &&
@@ -29,6 +30,12 @@ services:
     restart: unless-stopped
     networks:
       - simplebank-net
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:8500/v1/status/leader && consul kv get -recurse | grep -q ."]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
 
   postgres:
     image: postgres:15
@@ -62,8 +69,10 @@ services:
       - AUTHSERVER_ISSUER=http://auth-server:9000
       - AUTHSERVER_REDIRECT=http://front-ui:8080
     depends_on:
-      - postgres
-      - consul
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -82,9 +91,12 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - postgres
-      - consul
-      - auth-server
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -103,9 +115,12 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - postgres
-      - consul
-      - auth-server
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -124,9 +139,12 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - postgres
-      - consul
-      - auth-server
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -145,9 +163,12 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - postgres
-      - consul
-      - auth-server
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -207,9 +228,12 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - postgres
-      - consul
-      - auth-server
+      postgres:
+        condition: service_started
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -228,8 +252,15 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
       - ACCOUNTS_URL=http://accounts:8082
+      - OAUTH2_ISSUER_URI=http://auth-server:9000
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
+      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GATEWAY_CLIENT_REDIRECT_URI=http://localhost:8082/login/oauth2/code/gateway-client
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_GATEWAY_CLIENT_AUTHORIZATION_URI=http://auth-server:9000/oauth2/authorize
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_GATEWAY_CLIENT_TOKEN_URI=http://auth-server:9000/oauth2/token
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_GATEWAY_CLIENT_USER_INFO_URI=http://auth-server:9000/userinfo
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - simplebank-net
@@ -248,8 +279,10 @@ services:
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
-      - consul
-      - gateway
+      consul:
+        condition: service_healthy
+      gateway:
+        condition: service_started
     restart: unless-stopped
     networks:
       - simplebank-net
