@@ -59,6 +59,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
+      - AUTHSERVER_ISSUER=http://auth-server:9000
+      - AUTHSERVER_REDIRECT=http://front-ui:8080
     depends_on:
       - postgres
       - consul
@@ -225,6 +227,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
       - GATEWAY_URL=http://gateway:8081
       - AUTH_SERVER_URL=http://auth-server:9000
+      - ACCOUNTS_URL=http://accounts:8082
     depends_on:
       - consul
     restart: unless-stopped
