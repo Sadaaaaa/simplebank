@@ -1,12 +1,41 @@
 version: '3.8'
 
 services:
+#  consul:
+#    image: consul:1.15
+#    ports:
+#      - "8500:8500"   # Web UI
+#      - "8600:8600/udp"  # DNS
+#    command: agent -server -bootstrap -ui -client=0.0.0.0
+
   consul:
-    image: consul:1.15
+    image: consul:1.15.4
+    container_name: consul
     ports:
-      - "8500:8500"   # Web UI
-      - "8600:8600/udp"  # DNS
-    command: agent -server -bootstrap -ui -client=0.0.0.0
+      - "8500:8500"  # Web UI будет доступен на localhost:8501
+      - "8600:8600/udp"  # DNS на порту 8601
+    volumes:
+      - consul_data:/consul/data
+      - ./backups:/consul/backups  # Папка для бэкапов
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    user: "0:0"  # Запускаем от root для доступа к файлам
+    command: >
+      sh -c "
+      consul agent -dev -client=0.0.0.0 -ui &
+      sleep 15 &&
+      BACKUP_FILE=$$(ls -t /consul/backups/*.snap 2>/dev/null | head -n1) &&
+      if [ -n \"$$BACKUP_FILE\" ]; then
+        echo \"Найден snapshot: $$BACKUP_FILE\" &&
+        until consul members 2>/dev/null; do sleep 2; done &&
+        consul snapshot restore \"$$BACKUP_FILE\" &&
+        echo \"Snapshot восстановлен успешно!\"
+      else
+        echo \"Snapshot файлы не найдены\"
+      fi &&
+      wait
+      "
+    restart: unless-stopped
 
   postgres:
     image: postgres:15
@@ -21,3 +50,4 @@ services:
 
 volumes:
   postgres_data:
+  consul_data:
