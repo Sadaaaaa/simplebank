@@ -57,6 +57,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -75,6 +77,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -94,6 +98,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -113,6 +119,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -132,6 +140,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -151,6 +161,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - consul
       - auth-server
@@ -170,6 +182,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - consul
       - auth-server
@@ -188,6 +202,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - postgres
       - consul
@@ -207,6 +223,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - consul
     restart: unless-stopped
@@ -224,6 +242,8 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/simplebank_db
+      - GATEWAY_URL=http://gateway:8081
+      - AUTH_SERVER_URL=http://auth-server:9000
     depends_on:
       - consul
       - gateway
