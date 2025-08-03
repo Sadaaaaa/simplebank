@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include \"simplebank.fullname\" . }}-test-connection"
+  labels:
+    {{- include \"simplebank.labels\" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: test-connection
+      image: busybox
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Testing connection to services..."
+          
+          # Test auth-server
+          echo "Testing auth-server..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-auth-server:9000/actuator/health || exit 1
+          
+          # Test accounts
+          echo "Testing accounts..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-accounts:8082/actuator/health || exit 1
+          
+          # Test cash
+          echo "Testing cash..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-cash:8083/actuator/health || exit 1
+          
+          # Test transfer
+          echo "Testing transfer..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-transfer:8084/actuator/health || exit 1
+          
+          # Test exchange
+          echo "Testing exchange..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-exchange:8086/actuator/health || exit 1
+          
+          # Test exchange-generator
+          echo "Testing exchange-generator..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-exchange-generator:8085/actuator/health || exit 1
+          
+          # Test blocker
+          echo "Testing blocker..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-blocker:8087/actuator/health || exit 1
+          
+          # Test notifications
+          echo "Testing notifications..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-notifications:8088/actuator/health || exit 1
+          
+          # Test gateway
+          echo "Testing gateway..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-gateway:8081/actuator/health || exit 1
+          
+          # Test front-ui
+          echo "Testing front-ui..."
+          wget --timeout=10 --tries=3 -O- http://{{ include \"simplebank.fullname\" . }}-front-ui:8080/actuator/health || exit 1
+          
+          echo "All connection tests passed!"
+  restartPolicy: Never 

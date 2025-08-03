@@ -1,0 +1,76 @@
+replicaCount: 2
+
+image:
+  repository: simplebank/exchange-generator
+  tag: "2.0.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: exchange-generator.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application specific configuration
+config:
+  database:
+    url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+    username: "postgres"
+    password: "postgres"
+  
+  auth:
+    server:
+      url: "http://auth-server:9000"
+      client:
+        id: "exchange-generator-client"
+        secret: "exchange-generator-secret"
+  
+  server:
+    port: 8080
+  
+  gateway:
+    url: "http://gateway:8081"

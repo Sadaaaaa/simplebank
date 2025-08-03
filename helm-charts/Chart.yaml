@@ -1,0 +1,42 @@
+apiVersion: v2
+name: simplebank
+description: A Helm chart for SimpleBank microservices application
+type: application
+version: 2.0.0
+appVersion: "2.0.0"
+
+dependencies:
+  - name: auth-server
+    version: 2.0.0
+    condition: auth-server.enabled
+  - name: accounts
+    version: 2.0.0
+    condition: accounts.enabled
+  - name: cash
+    version: 2.0.0
+    condition: cash.enabled
+  - name: transfer
+    version: 2.0.0
+    condition: transfer.enabled
+  - name: exchange
+    version: 2.0.0
+    condition: exchange.enabled
+  - name: exchange-generator
+    version: 2.0.0
+    condition: exchange-generator.enabled
+  - name: blocker
+    version: 2.0.0
+    condition: blocker.enabled
+  - name: notifications
+    version: 2.0.0
+    condition: notifications.enabled
+  - name: gateway
+    version: 2.0.0
+    condition: gateway.enabled
+  - name: front-ui
+    version: 2.0.0
+    condition: front-ui.enabled
+  - name: postgresql
+    version: 12.5.31
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled 

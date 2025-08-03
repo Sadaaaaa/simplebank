@@ -1,0 +1,86 @@
+replicaCount: 1
+
+image:
+  repository: simplebank/auth-server
+  tag: "2.0.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 9000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: auth-server.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application specific configuration
+config:
+  authserver:
+    issuer: "http://auth-server:9000"
+    redirect: "http://front-ui:8080"
+  
+  database:
+    url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+    username: "postgres"
+    password: "postgres"
+  
+  oauth2:
+    clients:
+      gateway-client:
+        secret: "gateway-secret"
+      exchange-generator-client:
+        secret: "exchange-generator-secret"
+      exchange-client:
+        secret: "exchange-secret"
+      accounts-client:
+        secret: "accounts-secret"
+      transfer-client:
+        secret: "transfer-secret"
+      blocker-client:
+        secret: "blocker-secret"
+      notifications-client:
+        secret: "notifications-secret"
+      cash-client:
+        secret: "cash-secret" 

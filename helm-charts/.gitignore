@@ -1,0 +1,21 @@
+# Helm
+charts/*.tgz
+charts/*.tar.gz
+
+# Dependencies
+charts/*/charts/
+charts/*/requirements.lock
+
+# Generated files
+*.yaml.bak
+*.yaml.backup
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db 

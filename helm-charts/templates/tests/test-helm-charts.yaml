@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include \"simplebank.fullname\" . }}-test-helm-charts"
+  labels:
+    {{- include \"simplebank.labels\" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: test-helm-charts
+      image: alpine/helm:latest
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Testing Helm charts..."
+          
+          # Установка kubectl
+          apk add --no-cache kubectl
+          
+          # Проверка доступности сервисов
+          echo "Checking service availability..."
+          
+          # Проверка auth-server
+          kubectl get service {{ include "simplebank.fullname" . }}-auth-server -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка accounts
+          kubectl get service {{ include "simplebank.fullname" . }}-accounts -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка cash
+          kubectl get service {{ include "simplebank.fullname" . }}-cash -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка transfer
+          kubectl get service {{ include "simplebank.fullname" . }}-transfer -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка exchange
+          kubectl get service {{ include "simplebank.fullname" . }}-exchange -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка exchange-generator
+          kubectl get service {{ include "simplebank.fullname" . }}-exchange-generator -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка blocker
+          kubectl get service {{ include "simplebank.fullname" . }}-blocker -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка notifications
+          kubectl get service {{ include "simplebank.fullname" . }}-notifications -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка gateway
+          kubectl get service {{ include "simplebank.fullname" . }}-gateway -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка front-ui
+          kubectl get service {{ include "simplebank.fullname" . }}-front-ui -n {{ .Release.Namespace }} || exit 1
+          
+          # Проверка PostgreSQL
+          kubectl get service postgresql -n {{ .Release.Namespace }} || exit 1
+          
+          echo "All Helm chart tests passed!"
+  restartPolicy: Never 

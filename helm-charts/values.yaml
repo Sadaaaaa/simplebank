@@ -1,0 +1,240 @@
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  postgresql:
+    enabled: true
+    auth:
+      postgresPassword: "postgres"
+      database: "simplebank_db"
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi
+
+# Auth Server configuration
+auth-server:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: simplebank/auth-server
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: false
+
+# Accounts service configuration
+accounts:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/accounts
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8082
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: false
+
+# Cash service configuration
+cash:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/cash
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8083
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: false
+
+# Transfer service configuration
+transfer:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/transfer
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8084
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: false
+
+# Exchange service configuration
+exchange:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: simplebank/exchange
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8086
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  ingress:
+    enabled: false
+
+# Exchange Generator service configuration
+exchange-generator:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: simplebank/exchange-generator
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8085
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  ingress:
+    enabled: false
+
+# Blocker service configuration
+blocker:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: simplebank/blocker
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8087
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  ingress:
+    enabled: false
+
+# Notifications service configuration
+notifications:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/notifications
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8088
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  ingress:
+    enabled: false
+
+# Gateway service configuration
+gateway:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/gateway
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8081
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+    hosts:
+      - host: simplebank.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Front UI service configuration
+front-ui:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: simplebank/front-ui
+    tag: "2.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 150m
+      memory: 128Mi
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+    hosts:
+      - host: simplebank.local
+        paths:
+          - path: /
+            pathType: Prefix 
