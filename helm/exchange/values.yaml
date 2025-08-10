@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+  repository: exchange
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8086
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Application specific configuration
+app:
+  profile: "prod"
+  
+# Database configuration
+database:
+  url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+  username: "postgres"
+  password: "postgres"
+
+# OAuth2 configuration
+oauth2:
+  authServerUrl: "http://auth-server:9000"
+  clientId: "exchange-client"
+  clientSecret: "exchange-secret"
+
+# Gateway URL
+gateway:
+  url: "http://gateway:8081"

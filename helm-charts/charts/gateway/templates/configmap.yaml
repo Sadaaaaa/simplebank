@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: simplebank
+data:
+  application.properties: |
+    # Actuator configuration
+    management.endpoints.web.exposure.include=health,info
+    management.endpoint.health.show-details=always
+    
+    server.port=8081
+    
+    spring.security.oauth2.resourceserver.jwt.issuer-uri=http://auth-server-service:9000
+    
+    spring.security.oauth2.client.registration.gateway-client.client-id=${OAUTH2_CLIENT_ID}
+    spring.security.oauth2.client.registration.gateway-client.client-secret=${OAUTH2_CLIENT_SECRET}
+    spring.security.oauth2.client.registration.gateway-client.authorization-grant-type=authorization_code
+    spring.security.oauth2.client.registration.gateway-client.redirect-uri=http://gateway-service:8082/login/oauth2/code/gateway-client
+    spring.security.oauth2.client.registration.gateway-client.scope=openid,read,write
+    
+    spring.security.oauth2.client.provider.gateway-client.authorization-uri=http://auth-server-service:9000/oauth2/authorize
+    spring.security.oauth2.client.provider.gateway-client.token-uri=http://auth-server-service:9000/oauth2/token
+    spring.security.oauth2.client.provider.gateway-client.user-info-uri=http://auth-server-service:9000/userinfo
+

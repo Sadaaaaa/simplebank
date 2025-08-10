@@ -1,0 +1,70 @@
+replicaCount: 1
+
+image:
+  repository: cash
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8083
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: cash.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application specific configuration
+app:
+  profile: "prod"
+  
+# Database configuration
+database:
+  url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+  username: "postgres"
+  password: "postgres"
+
+# Consul configuration
+consul:
+  host: "consul"
+  port: 8500
+
+# OAuth2 configuration
+oauth2:
+  authServerUrl: "http://auth-server:9000"
+  clientId: "cash-client"
+  clientSecret: "cash-secret"
+
+# Gateway URL
+gateway:
+  url: "http://gateway:8081"

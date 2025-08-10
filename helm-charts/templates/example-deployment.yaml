@@ -1,0 +1,144 @@
+# Пример использования ConfigMaps и Secrets в Deployment
+# Этот файл демонстрирует, как подключить конфигурации к подам
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-deployment
+  namespace: simplebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts
+  template:
+    metadata:
+      labels:
+        app: accounts
+    spec:
+      containers:
+      - name: accounts
+        image: simplebank/accounts:latest
+        ports:
+        - containerPort: 8082
+        env:
+        # Переменные окружения из общих секретов
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: url
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: password
+        # OAuth2 настройки из секрета
+        - name: OAUTH2_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: accounts-oauth2-secret
+              key: client-id
+        - name: OAUTH2_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: accounts-oauth2-secret
+              key: client-secret
+        volumeMounts:
+        # Монтирование ConfigMap как файла конфигурации
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      # Том для ConfigMap
+      - name: config-volume
+        configMap:
+          name: accounts-config
+---
+# Пример для другого сервиса (Cash)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cash-deployment
+  namespace: simplebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cash
+  template:
+    metadata:
+      labels:
+        app: cash
+    spec:
+      containers:
+      - name: cash
+        image: simplebank/cash:latest
+        ports:
+        - containerPort: 8083
+        env:
+        # Переменные окружения из общих секретов
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: url
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: password
+        # OAuth2 настройки из секрета
+        - name: OAUTH2_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: cash-oauth2-secret
+              key: client-id
+        - name: OAUTH2_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cash-oauth2-secret
+              key: client-secret
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cash-config
+

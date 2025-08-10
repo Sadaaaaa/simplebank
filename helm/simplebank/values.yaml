@@ -1,0 +1,86 @@
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    username: "postgres"
+    password: "postgres"
+    database: "simplebank_db"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# Consul configuration
+consul:
+  enabled: true
+  global:
+    name: consul
+  server:
+    replicas: 1
+    storage: 1Gi
+  ui:
+    enabled: true
+  connectInject:
+    enabled: false
+
+# Microservices configuration
+accounts:
+  enabled: true
+  service:
+    port: 8082
+  database:
+    url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
+  consul:
+    host: "simplebank-consul-server"
+
+cash:
+  enabled: true
+  service:
+    port: 8083
+  database:
+    url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
+  consul:
+    host: "simplebank-consul-server"
+
+exchange:
+  enabled: true
+  service:
+    port: 8086
+  database:
+    url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
+  consul:
+    host: "simplebank-consul-server"
+
+transfer:
+  enabled: true
+  service:
+    port: 8084
+  database:
+    url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
+  consul:
+    host: "simplebank-consul-server"
+
+gateway:
+  enabled: true
+  service:
+    port: 8081
+  consul:
+    host: "simplebank-consul-server"
+
+authServer:
+  enabled: true
+  service:
+    port: 9000
+  database:
+    url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
+
+frontUi:
+  enabled: true
+  service:
+    port: 8080

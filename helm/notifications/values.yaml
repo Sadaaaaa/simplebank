@@ -1,0 +1,44 @@
+replicaCount: 1
+
+image:
+  repository: notifications
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8088
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 150m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Application specific configuration
+app:
+  profile: "prod"
+  
+# Database configuration
+database:
+  url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+  username: "postgres"
+  password: "postgres"
+
+# OAuth2 configuration
+oauth2:
+  authServerUrl: "http://auth-server:9000"
+  clientId: "notifications-client"
+  clientSecret: "notifications-secret"
