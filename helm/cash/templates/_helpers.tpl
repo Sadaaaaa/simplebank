@@ -1,8 +1,8 @@
-{{- define "transfer.name" -}}
+{{- define "cash.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "transfer.fullname" -}}
+{{- define "cash.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -15,13 +15,13 @@
 {{- end }}
 {{- end }}
 
-{{- define "transfer.chart" -}}
+{{- define "cash.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "transfer.labels" -}}
-helm.sh/chart: {{ include "transfer.chart" . }}
-{{ include "transfer.selectorLabels" . }}
+{{- define "cash.labels" -}}
+helm.sh/chart: {{ include "cash.chart" . }}
+{{ include "cash.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -29,7 +29,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: simplebank
 {{- end }}
 
-{{- define "transfer.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "transfer.name" . }}
+{{- define "cash.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "cash.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

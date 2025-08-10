@@ -10,10 +10,6 @@ dependencies:
     version: "15.5.32"
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
-  - name: consul
-    version: "1.0.2"
-    repository: "https://helm.releases.hashicorp.com"
-    condition: consul.enabled
   - name: accounts
     version: "0.1.0"
     repository: "file://../accounts"

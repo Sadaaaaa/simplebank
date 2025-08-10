@@ -37,6 +37,11 @@ database:
   username: "postgres"
   password: "postgres"
 
+# Consul configuration
+consul:
+  host: "consul"
+  port: 8500
+
 # OAuth2 configuration
 oauth2:
   authServerUrl: "http://auth-server:9000"

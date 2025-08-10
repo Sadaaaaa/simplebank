@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "transfer.fullname" . }}
+  name: {{ include "cash.fullname" . }}
   labels:
-    {{- include "transfer.labels" . | nindent 4 }}
+    {{- include "cash.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "transfer.selectorLabels" . | nindent 6 }}
+      {{- include "cash.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "transfer.selectorLabels" . | nindent 8 }}
+        {{- include "cash.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -54,21 +54,15 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "transfer.fullname" . }}-secret
+                  name: {{ include "cash.fullname" . }}-secret
                   key: database-password
-            - name: SPRING_CLOUD_CONSUL_HOST
-              value: {{ .Values.consul.host }}
-            - name: SPRING_CLOUD_CONSUL_PORT
-              value: "{{ .Values.consul.port }}"
+
             - name: AUTH_SERVER_URL
-              value: {{ .Values.oauth2.authServerUrl }}
+              value: "http://auth-server:9000"
             - name: AUTH_CLIENT_ID
-              value: {{ .Values.oauth2.clientId }}
+              value: "cash-client"
             - name: AUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "transfer.fullname" . }}-secret
-                  key: oauth2-client-secret
+              value: "cash-secret"
             - name: GATEWAY_URL
               value: {{ .Values.gateway.url }}
           resources:

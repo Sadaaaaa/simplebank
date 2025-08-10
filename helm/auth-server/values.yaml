@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: notifications
+  repository: auth-server
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -11,15 +11,15 @@ fullnameOverride: ""
 
 service:
   type: ClusterIP
-  port: 8088
+  port: 9000
 
 resources:
   limits:
-    cpu: 300m
-    memory: 256Mi
+    cpu: 500m
+    memory: 512Mi
   requests:
-    cpu: 150m
-    memory: 128Mi
+    cpu: 250m
+    memory: 256Mi
 
 autoscaling:
   enabled: false
@@ -36,14 +36,3 @@ database:
   url: "jdbc:postgresql://postgresql:5432/simplebank_db"
   username: "postgres"
   password: "postgres"
-
-# Consul configuration
-consul:
-  host: "consul"
-  port: 8500
-
-# OAuth2 configuration
-oauth2:
-  authServerUrl: "http://auth-server:9000"
-  clientId: "notifications-client"
-  clientSecret: "notifications-secret"

@@ -1,19 +1,35 @@
 {{- define "notifications.name" -}}
-{{- include "microservice.name" . }}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "notifications.fullname" -}}
-{{- include "microservice.fullname" . }}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{- define "notifications.chart" -}}
-{{- include "microservice.chart" . }}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "notifications.labels" -}}
-{{- include "microservice.labels" . }}
+helm.sh/chart: {{ include "notifications.chart" . }}
+{{ include "notifications.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: simplebank
 {{- end }}
 
 {{- define "notifications.selectorLabels" -}}
-{{- include "microservice.selectorLabels" . }}
+app.kubernetes.io/name: {{ include "notifications.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
