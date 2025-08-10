@@ -26,14 +26,10 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
-
-# Application specific configuration
-app:
-  profile: "prod"
   
 # Database configuration
 database:
-  url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+  url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
   username: "postgres"
   password: "postgres"
 
@@ -42,7 +38,3 @@ oauth2:
   authServerUrl: "http://auth-server:9000"
   clientId: "exchange-client"
   clientSecret: "exchange-secret"
-
-# Gateway URL
-gateway:
-  url: "http://gateway:8081"

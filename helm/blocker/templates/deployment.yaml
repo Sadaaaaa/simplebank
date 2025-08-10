@@ -27,10 +27,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-{{/*      {{- with .Values.podSecurityContext }}*/}}
-{{/*      securityContext:*/}}
-{{/*        {{- toYaml . | nindent 8 }}*/}}
-{{/*      {{- end }}*/}}
 
       containers:
         - name: {{ .Chart.Name }}
@@ -54,8 +50,6 @@ spec:
             periodSeconds: 10
 
           env:
-            - name: SERVER_PORT
-              value: "{{ .Values.service.port }}"
             - name: OAUTH2_CLIENT_ID
               value: "blocker-client"
             - name: OAUTH2_CLIENT_SECRET
@@ -65,15 +59,15 @@ spec:
                   key: oauth2-client-secret
 
           volumeMounts:
-            - name: config-volume
-              mountPath: /config
-              readOnly: true
+            - name: blocker-config
+              mountPath: /app/config/application.properties
+              subPath: application.properties
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
       volumes:
-        - name: config-volume
+        - name: blocker-config
           configMap:
             name: blocker-config
             items:

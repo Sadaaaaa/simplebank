@@ -44,9 +44,13 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
+
+          volumeMounts:
+            - name: exchange-config
+              mountPath: /app/config/application.properties
+              subPath: application.properties
+
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.app.profile }}
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.database.url }}
             - name: SPRING_DATASOURCE_USERNAME
@@ -63,10 +67,18 @@ spec:
               value: "exchange-client"
             - name: AUTH_CLIENT_SECRET
               value: "exchange-secret"
-            - name: GATEWAY_URL
-              value: {{ .Values.gateway.url }}
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+      volumes:
+        - name: exchange-config
+          configMap:
+            name: exchange-config
+            items:
+              - key: application.properties
+                path: application.properties
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

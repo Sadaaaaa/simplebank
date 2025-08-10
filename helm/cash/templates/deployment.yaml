@@ -44,9 +44,8 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
+
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.app.profile }}
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.database.url }}
             - name: SPRING_DATASOURCE_USERNAME
@@ -63,10 +62,23 @@ spec:
               value: "cash-client"
             - name: AUTH_CLIENT_SECRET
               value: "cash-secret"
-            - name: GATEWAY_URL
-              value: {{ .Values.gateway.url }}
+
+          volumeMounts:
+            - name: cash-config
+              mountPath: /app/config/application.properties
+              subPath: application.properties
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+      volumes:
+        - name: cash-config
+          configMap:
+            name: cash-config
+            items:
+              - key: application.properties
+                path: application.properties
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
