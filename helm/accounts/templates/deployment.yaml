@@ -49,6 +49,8 @@ spec:
               value: {{ .Values.app.profile }}
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.database.url }}
+            - name: SERVER_PORT
+              value: "{{ .Values.service.port }}"
             - name: SPRING_DATASOURCE_USERNAME
               value: {{ .Values.database.username }}
             - name: SPRING_DATASOURCE_PASSWORD

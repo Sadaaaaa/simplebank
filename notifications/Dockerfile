@@ -1,10 +1,17 @@
-FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -pl notifications -am -DskipTests
+FROM openjdk:21-jdk-slim
 
-FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /app/notifications/target/*.jar app.jar
+
+# Копируем JAR файл
+COPY target/notifications-0.0.1-SNAPSHOT.jar app.jar
+
+# Создаем пользователя для запуска приложения
+RUN groupadd -r spring && useradd -r -g spring spring
+RUN chown -R spring:spring /app
+USER spring
+
+# Открываем порт
 EXPOSE 8088
+
+# Команда запуска
 ENTRYPOINT ["java", "-jar", "app.jar"] 

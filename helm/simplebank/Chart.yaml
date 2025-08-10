@@ -34,11 +34,11 @@ dependencies:
     version: "0.1.0"
     repository: "file://../gateway"
     condition: gateway.enabled
-  - name: auth-server
+  - name: authServer
     version: "0.1.0"
     repository: "file://../auth-server"
     condition: authServer.enabled
-  - name: front-ui
+  - name: frontUi
     version: "0.1.0"
     repository: "file://../front-ui"
     condition: frontUi.enabled

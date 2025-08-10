@@ -1,5 +1,6 @@
 package com.kitchentech.notifications.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
@@ -8,6 +9,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 @Configuration
+@ConditionalOnProperty(name = "spring.security.oauth2.client.registration.auth-server.client-id")
 public class OAuth2ClientConfig {
 
     @Bean

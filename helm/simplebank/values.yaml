@@ -16,19 +16,6 @@ postgresql:
       enabled: true
       size: 8Gi
 
-# Consul configuration
-consul:
-  enabled: true
-  global:
-    name: consul
-  server:
-    replicas: 1
-    storage: 1Gi
-  ui:
-    enabled: true
-  connectInject:
-    enabled: false
-
 # Microservices configuration
 accounts:
   enabled: true
@@ -36,8 +23,6 @@ accounts:
     port: 8082
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
-  consul:
-    host: "simplebank-consul-server"
 
 cash:
   enabled: true
@@ -45,8 +30,6 @@ cash:
     port: 8083
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
-  consul:
-    host: "simplebank-consul-server"
 
 exchange:
   enabled: true
@@ -54,8 +37,6 @@ exchange:
     port: 8086
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
-  consul:
-    host: "simplebank-consul-server"
 
 transfer:
   enabled: true
@@ -63,15 +44,11 @@ transfer:
     port: 8084
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
-  consul:
-    host: "simplebank-consul-server"
 
 gateway:
   enabled: true
   service:
     port: 8081
-  consul:
-    host: "simplebank-consul-server"
 
 authServer:
   enabled: true

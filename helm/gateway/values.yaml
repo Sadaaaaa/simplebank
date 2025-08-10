@@ -39,10 +39,6 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
 
-# Application specific configuration
-app:
-  profile: "prod"
-
 # OAuth2 configuration
 oauth2:
   authServerUrl: "http://auth-server:9000"

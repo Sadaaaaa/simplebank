@@ -56,19 +56,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "notifications.fullname" . }}-secret
                   key: database-password
-            - name: SPRING_CLOUD_CONSUL_HOST
-              value: {{ .Values.consul.host }}
-            - name: SPRING_CLOUD_CONSUL_PORT
-              value: "{{ .Values.consul.port }}"
+
             - name: AUTH_SERVER_URL
-              value: {{ .Values.oauth2.authServerUrl }}
+              value: "http://auth-server:9000"
             - name: AUTH_CLIENT_ID
-              value: {{ .Values.oauth2.clientId }}
+              value: "notifications-client"
             - name: AUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "notifications.fullname" . }}-secret
-                  key: oauth2-client-secret
+              value: "notifications-secret"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
