@@ -1,0 +1,19 @@
+image:
+  registry: docker.io
+  repository: bitnami/postgresql
+  tag: "17"
+  pullPolicy: IfNotPresent
+
+auth:
+  username: postgres
+  password: postgres
+  database: simplebank_db
+
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""  # или название твоего StorageClass, если нужно
+
+# (Необязательно) Запуск в одном поде без репликации
+architecture: standalone
