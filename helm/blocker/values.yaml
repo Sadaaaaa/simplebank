@@ -47,5 +47,5 @@ affinity: {}
 # OAuth2 configuration
 oauth2:
   authServerUrl: "http://auth-server:9000"
-  clientId: "accounts-client"
-  clientSecret: "accounts-secret"
+  clientId: "blocker-client"
+  clientSecret: "blocker-secret"

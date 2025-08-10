@@ -59,7 +59,10 @@ spec:
             - name: OAUTH2_CLIENT_ID
               value: "blocker-client"
             - name: OAUTH2_CLIENT_SECRET
-              value: "blocker-secret"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "blocker.fullname" . }}-secret
+                  key: oauth2-client-secret
 
           volumeMounts:
             - name: config-volume
@@ -72,7 +75,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: accounts-config
+            name: blocker-config
             items:
               - key: application.properties
                 path: application.properties
