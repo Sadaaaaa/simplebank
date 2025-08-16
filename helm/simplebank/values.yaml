@@ -59,50 +59,21 @@ gateway:
   ingress:
     enabled: false
 
-frontUi:
-  replicaCount: 1
-  image:
-    repository: nginx
-    pullPolicy: IfNotPresent
-    tag: ""
-  service:
-    type: ClusterIP
-    port: 80
-  ingress:
-    enabled: true
-    className: nginx
-    annotations: {}
-    hosts:
-      - host: simplebank.local
-        paths:
-          - path: /
-            pathType: Prefix
-    tls: []
-  serviceAccount:
-    create: true
-    name: ""
-    automount: true
-    annotations: {}
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 80
-
 front-ui:
   replicaCount: 1
   image:
-    repository: nginx
+    repository: front-ui
     pullPolicy: IfNotPresent
-    tag: ""
+    tag: "latest"
   service:
-    type: ClusterIP
-    port: 80
+    type: NodePort
+    port: 8080
   ingress:
     enabled: true
     className: nginx
-    annotations: {}
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
       - host: simplebank.local
         paths:
@@ -137,4 +108,6 @@ ingressNginx:
   controller:
     service:
       type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: nlb
 
