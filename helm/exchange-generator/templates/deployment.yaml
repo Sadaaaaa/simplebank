@@ -49,16 +49,11 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
 
-{{/*          env:*/}}
-{{/*            - name: SPRING_DATASOURCE_URL*/}}
-{{/*              value: {{ .Values.database.url }}*/}}
-{{/*            - name: SPRING_DATASOURCE_USERNAME*/}}
-{{/*              value: {{ .Values.database.username }}*/}}
-{{/*            - name: SPRING_DATASOURCE_PASSWORD*/}}
-{{/*              valueFrom:*/}}
-{{/*                secretKeyRef:*/}}
-{{/*                  name: {{ include "exchange-generator.fullname" . }}-secret*/}}
-{{/*                  key: database-password*/}}
+          env:
+            - name: OAUTH2_CLIENT_ID
+              value: {{ .Values.oauth2.clientId }}
+            - name: OAUTH2_CLIENT_SECRET
+              value: {{ .Values.oauth2.clientSecret }}
 
           volumeMounts:
             - name: exchange-generator-config

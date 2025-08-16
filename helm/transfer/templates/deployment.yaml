@@ -45,8 +45,6 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.app.profile }}
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.database.url }}
             - name: SPRING_DATASOURCE_USERNAME
@@ -56,16 +54,31 @@ spec:
                 secretKeyRef:
                   name: {{ include "transfer.fullname" . }}-secret
                   key: database-password
-            - name: AUTH_SERVER_URL
-              value: "http://auth-server:9000"
-            - name: AUTH_CLIENT_ID
+
+            - name: OAUTH2_CLIENT_ID
               value: "transfer-client"
-            - name: AUTH_CLIENT_SECRET
+            - name: OAUTH2_CLIENT_SECRET
               value: "transfer-secret"
+
             - name: GATEWAY_URL
               value: {{ .Values.gateway.url }}
+
+          volumeMounts:
+            - name: transfer-config
+              mountPath: /app/config/application.properties
+              subPath: application.properties
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+      volumes:
+        - name: transfer-config
+          configMap:
+            name: transfer-config
+            items:
+              - key: application.properties
+                path: application.properties
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

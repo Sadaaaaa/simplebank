@@ -27,20 +27,11 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
 
-# Application specific configuration
-app:
-  profile: "prod"
-  
 # Database configuration
 database:
-  url: "jdbc:postgresql://postgresql:5432/simplebank_db"
+  url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
   username: "postgres"
   password: "postgres"
-
-# Consul configuration
-consul:
-  host: "consul"
-  port: 8500
 
 # OAuth2 configuration
 oauth2:
