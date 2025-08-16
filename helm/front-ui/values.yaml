@@ -14,7 +14,7 @@ ingress:
   className: nginx
   annotations: {}
   hosts:
-    - host: simplebank.local   # будет использоваться для доступа
+    - host: simplebank.local
       paths:
         - path: /
           pathType: Prefix
