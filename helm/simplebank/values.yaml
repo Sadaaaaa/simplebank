@@ -45,11 +45,6 @@ transfer:
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
 
-gateway:
-  enabled: true
-  service:
-    port: 8081
-
 authServer:
   enabled: true
   service:
@@ -57,7 +52,89 @@ authServer:
   database:
     url: "jdbc:postgresql://simplebank-postgresql:5432/simplebank_db"
 
+gateway:
+  service:
+    type: ClusterIP
+    port: 8081
+  ingress:
+    enabled: false
+
 frontUi:
+  replicaCount: 1
+  image:
+    repository: nginx
+    pullPolicy: IfNotPresent
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    className: nginx
+    annotations: {}
+    hosts:
+      - host: simplebank.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  serviceAccount:
+    create: true
+    name: ""
+    automount: true
+    annotations: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+front-ui:
+  replicaCount: 1
+  image:
+    repository: nginx
+    pullPolicy: IfNotPresent
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: true
+    className: nginx
+    annotations: {}
+    hosts:
+      - host: simplebank.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  serviceAccount:
+    create: true
+    name: ""
+    automount: true
+    annotations: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+exchangeGenerator:
   enabled: true
   service:
-    port: 8080
+    port: 8085
+
+blocker:
+  enabled: true
+  service:
+    port: 8087
+
+# Ingress controller dependency (ingress-nginx)
+ingressNginx:
+  enabled: false
+  controller:
+    service:
+      type: LoadBalancer
+

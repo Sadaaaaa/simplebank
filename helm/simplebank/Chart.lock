@@ -1,7 +1,7 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.5.32
+  version: 16.7.26
 - name: accounts
   repository: file://../accounts
   version: 0.1.0
@@ -20,11 +20,20 @@ dependencies:
 - name: gateway
   repository: file://../gateway
   version: 0.1.0
-- name: authServer
+- name: auth-server
   repository: file://../auth-server
   version: 0.1.0
-- name: frontUi
+- name: front-ui
   repository: file://../front-ui
   version: 0.1.0
-digest: sha256:f92d4c1790cbf924db1ee3e8d8af1f6127554c7be44b375f55450651c7482b4a
-generated: "2025-08-10T14:07:16.981061+03:00"
+- name: blocker
+  repository: file://../blocker
+  version: 0.1.0
+- name: exchange-generator
+  repository: file://../exchange-generator
+  version: 0.1.0
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.10.1
+digest: sha256:4c35e41d8df3b6c29842f60f5649800f083db00b87c435857830909e119101d4
+generated: "2025-08-16T15:41:59.490102+03:00"

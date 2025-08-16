@@ -7,7 +7,7 @@ appVersion: "1.0.0"
 
 dependencies:
   - name: postgresql
-    version: "15.5.32"
+    version: "16.7.26"
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
   - name: accounts
@@ -34,11 +34,23 @@ dependencies:
     version: "0.1.0"
     repository: "file://../gateway"
     condition: gateway.enabled
-  - name: authServer
+  - name: auth-server
     version: "0.1.0"
     repository: "file://../auth-server"
     condition: authServer.enabled
-  - name: frontUi
+  - name: front-ui
     version: "0.1.0"
     repository: "file://../front-ui"
     condition: frontUi.enabled
+  - name: blocker
+    version: "0.1.0"
+    repository: "file://../blocker"
+    condition: blocker.enabled
+  - name: exchange-generator
+    version: "0.1.0"
+    repository: "file://../exchange-generator"
+    condition: exchangeGenerator.enabled
+  - name: ingress-nginx
+    version: "4.10.1"
+    repository: "https://kubernetes.github.io/ingress-nginx"
+    condition: ingressNginx.enabled
